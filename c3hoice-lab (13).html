@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="C3hoice Lab">
+<meta name="theme-color" content="#2c3e5a">
+<meta name="description" content="A rigorous, warm decision-making tool built on the C³ philosophy. Map your alternatives, identify critical signals, and choose with clarity.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>The C3hoice Lab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&family=Nunito:wght@400;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #fdf6ec;
+  --warm: #fef9f2;
+  --terra: #c4603a;
+  --terra-dark: #a04a28;
+  --amber: #d4891a;
+  --amber-light: #f0b84a;
+  --forest: #3d5a3e;
+  --navy: #2c3e5a;
+  --sand: #e8d5b0;
+  --sand-dark: #c8b48a;
+  --ink: #2a1f14;
+  --muted: #7a6a58;
+  --pos: #3d7a3e;
+  --pos-bg: #edf7ee;
+  --neg: #9b3a22;
+  --neg-bg: #fdf0ec;
+  --signal: #8b1a1a;
+  --line: #e0cdb8;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  background: var(--cream);
+  font-family: 'Lora', serif;
+  color: var(--ink);
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.topbar {
+  background: var(--navy);
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-back {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: none; border-radius: 50%;
+  color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.topbar-back:hover { background: rgba(255,255,255,0.2); }
+.topbar-info { flex: 1; min-width: 0; }
+
+.topbar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700;
+  color: #fff; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.topbar-sub {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+.topbar-save {
+  background: rgba(240,184,74,0.2);
+  border: 1px solid rgba(240,184,74,0.4);
+  border-radius: 20px; padding: 6px 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--amber-light); cursor: pointer;
+  white-space: nowrap; transition: background 0.15s;
+}
+
+.topbar-save:hover { background: rgba(240,184,74,0.3); }
+
+/* Voice button wrap with Mentor label */
+.voice-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.voice-btn-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 8px; font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+.voice-btn {
+  width: 38px; height: 38px;
+  background: rgba(240,184,74,0.15);
+  border: 1.5px solid rgba(240,184,74,0.35);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+  font-size: 17px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.voice-btn:hover { background: rgba(240,184,74,0.28); }
+.voice-btn:active { transform: scale(0.92); }
+.voice-btn.speaking {
+  background: rgba(240,184,74,0.35);
+  animation: pulse-ring 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(240,184,74,0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(240,184,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(240,184,74,0); }
+}
+
+.progress-wrap {
+  background: var(--navy);
+  padding: 0 16px 14px;
+  flex-shrink: 0;
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px; overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--amber-light));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-top: 6px; text-align: right;
+}
+
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 16px calc(var(--safe-bot) + 100px);
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px calc(var(--safe-bot) + 12px);
+  background: linear-gradient(to top, var(--cream) 70%, transparent);
+  display: flex; gap: 10px;
+  z-index: 10;
+}
+
+.btn-primary {
+  flex: 1;
+  background: var(--terra);
+  color: #fff;
+  border: none; border-radius: 14px;
+  padding: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.3px;
+}
+
+.btn-primary:active { background: var(--terra-dark); transform: scale(0.98); }
+
+.btn-secondary {
+  background: var(--warm);
+  color: var(--muted);
+  border: 1.5px solid var(--sand);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-secondary:active { background: var(--sand); }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.screen.slide-forward {
+  animation: slideFromRight 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.screen.slide-back {
+  animation: slideFromLeft 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideFromLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.aspect-card {
+  animation: cardRise 0.3s ease both;
+}
+
+.aspect-card:nth-child(1) { animation-delay: 0.04s; }
+.aspect-card:nth-child(2) { animation-delay: 0.08s; }
+.aspect-card:nth-child(3) { animation-delay: 0.12s; }
+.aspect-card:nth-child(4) { animation-delay: 0.16s; }
+.aspect-card:nth-child(5) { animation-delay: 0.20s; }
+.aspect-card:nth-child(6) { animation-delay: 0.24s; }
+.aspect-card:nth-child(7) { animation-delay: 0.28s; }
+.aspect-card:nth-child(8) { animation-delay: 0.32s; }
+.aspect-card:nth-child(9) { animation-delay: 0.36s; }
+.aspect-card:nth-child(10) { animation-delay: 0.40s; }
+
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.summary-card {
+  animation: cardRise 0.3s ease both;
+}
+
+.home-hero {
+  background: var(--navy);
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(212,137,26,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(196,96,58,0.15) 0%, transparent 50%);
+}
+
+.home-hero-inner { position: relative; z-index: 1; }
+
+.home-tag {
+  display: inline-block;
+  border: 1px solid rgba(240,184,74,0.4);
+  color: var(--amber-light);
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+}
+
+.home-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px; font-weight: 700;
+  color: #fff; line-height: 1.1; margin-bottom: 6px;
+}
+
+.home-title em { font-style: italic; color: var(--amber-light); }
+
+.home-sub {
+  font-size: 13px; font-style: italic;
+  color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 18px;
+}
+
+.home-formula {
+  display: inline-block;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(240,184,74,0.3);
+  border-radius: 10px; padding: 10px 20px;
+}
+
+.home-formula-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--amber-light); letter-spacing: 3px;
+}
+
+.home-formula-sub {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.4); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px;
+}
+
+.home-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.home-btn {
+  padding: 16px 20px;
+  border-radius: 14px; border: none;
+  cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 14px;
+  transition: transform 0.15s;
+}
+
+.home-btn:active { transform: scale(0.98); }
+
+.home-btn-new { background: var(--terra); }
+.home-btn-continue { background: var(--warm); border: 1.5px solid var(--sand); }
+
+.home-btn-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.home-btn-new .home-btn-icon { background: rgba(255,255,255,0.2); }
+.home-btn-continue .home-btn-icon { background: var(--sand); }
+
+.home-btn-text { flex: 1; }
+
+.home-btn-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700; display: block;
+}
+
+.home-btn-new .home-btn-label { color: #fff; }
+.home-btn-continue .home-btn-label { color: var(--ink); }
+
+.home-btn-desc { font-size: 12px; font-style: italic; }
+.home-btn-new .home-btn-desc { color: rgba(255,255,255,0.7); }
+.home-btn-continue .home-btn-desc { color: var(--muted); }
+
+.home-btn-arrow { font-size: 20px; }
+.home-btn-new .home-btn-arrow { color: rgba(255,255,255,0.6); }
+.home-btn-continue .home-btn-arrow { color: var(--sand-dark); }
+
+.home-btn-share-app {
+  background: transparent;
+  border: 1.5px solid var(--sand);
+  border-radius: 14px; padding: 13px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; width: 100%;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-btn-share-app:active { background: var(--sand); }
+
+.home-btn-share-app-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--sand); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+
+.home-btn-share-app-text { flex: 1; text-align: left; }
+
+.home-btn-share-app-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted); display: block; margin-bottom: 1px;
+}
+
+.home-btn-share-app-desc {
+  font-family: 'Lora', serif;
+  font-size: 11px; font-style: italic; color: var(--sand-dark);
+}
+
+.home-btn-share-app-arrow { color: var(--sand-dark); font-size: 16px; }
+
+.home-info-cards {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.home-info-card {
+  background: var(--warm);
+  border: 1.5px solid var(--sand);
+  border-radius: 12px; padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.home-info-card:active { background: var(--sand); }
+.home-info-card.open { border-color: var(--terra); background: rgba(196,96,58,0.06); }
+
+.home-info-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 700; color: var(--terra);
+}
+
+.home-info-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 1px; margin-top: 2px;
+}
+
+.home-info-tap {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 600;
+  color: var(--sand-dark); margin-top: 5px;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+
+.home-info-card.open .home-info-tap { opacity: 0; }
+
+.home-info-expand {
+  display: none;
+  background: var(--warm);
+  border: 1.5px solid var(--terra);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  margin-top: 2px;
+  animation: expandDown 0.2s ease both;
+}
+
+.home-info-expand.show { display: block; }
+
+@keyframes expandDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.expand-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--terra); margin-bottom: 6px;
+}
+
+.expand-body {
+  font-size: 13px; line-height: 1.72;
+  color: var(--muted); font-style: italic;
+}
+
+.screen-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--ink); margin-bottom: 6px; line-height: 1.2;
+}
+
+.screen-heading em { font-style: italic; color: var(--terra); }
+
+.screen-sub {
+  font-size: 13px; font-style: italic;
+  color: var(--muted); line-height: 1.6; margin-bottom: 20px;
+}
+
+.field-group { margin-bottom: 18px; }
+
+.field-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--navy); margin-bottom: 8px; display: block;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--warm);
+  border: 1.5px solid var(--sand);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'Lora', serif;
+  font-size: 15px; color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: none;
+}
+
+.field-input:focus { border-color: var(--terra); }
+.field-input::placeholder { color: var(--sand-dark); font-style: italic; }
+textarea.field-input { min-height: 90px; line-height: 1.6; }
+
+.alt-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.badge-a { background: var(--navy); color: #fff; }
+.badge-b { background: var(--terra); color: #fff; }
+.badge-c { background: var(--forest); color: #fff; }
+
+.aspect-card {
+  border-radius: 14px; overflow: hidden;
+  border: 1.5px solid var(--sand); margin-bottom: 14px;
+}
+
+.aspect-card-header {
+  padding: 12px 14px;
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.aspect-card-header.pos { background: var(--pos-bg); color: var(--pos); border-bottom: 1px solid var(--sand); }
+.aspect-card-header.neg { background: var(--neg-bg); color: var(--neg); border-bottom: 1px solid var(--sand); }
+
+.aspect-card-body { background: var(--warm); padding: 14px; }
+
+.aspect-num {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+}
+
+.aspect-text-input {
+  width: 100%;
+  background: transparent;
+  border: none; border-bottom: 1px solid var(--line);
+  padding: 6px 0; margin-bottom: 12px;
+  font-family: 'Lora', serif; font-size: 14px; color: var(--ink);
+  outline: none;
+}
+
+.aspect-text-input::placeholder { color: var(--sand-dark); font-style: italic; }
+
+.rating-label-row {
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 600;
+  color: var(--muted); margin-bottom: 8px;
+  display: flex; justify-content: space-between;
+}
+
+.rating-pips { display: flex; gap: 6px; }
+
+.pip {
+  flex: 1; height: 44px;
+  border-radius: 10px; border: 1.5px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pip.pos-pip { border-color: var(--pos-bg); color: var(--pos); background: var(--pos-bg); }
+.pip.pos-pip.active { background: var(--pos); color: #fff; border-color: var(--pos); transform: scale(1.05); }
+.pip.neg-pip { border-color: var(--neg-bg); color: var(--neg); background: var(--neg-bg); }
+.pip.neg-pip.active { background: var(--neg); color: #fff; border-color: var(--neg); transform: scale(1.05); }
+
+.signal-flash {
+  display: none; margin-top: 8px;
+  background: #fdf0f0; border: 1px solid #e8c0c0;
+  border-radius: 8px; padding: 8px 10px;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600;
+  color: var(--signal);
+}
+
+.signal-flash.show { display: block; }
+
+.score-card {
+  background: var(--warm); border: 1.5px solid var(--sand);
+  border-radius: 14px; padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+
+.score-col { text-align: center; flex: 1; }
+
+.score-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700; line-height: 1;
+}
+
+.score-val.pos { color: var(--pos); }
+.score-val.neg { color: var(--neg); }
+.score-val.neutral { color: var(--navy); }
+
+.score-lbl {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); margin-top: 4px;
+}
+
+.score-divider { width: 1px; height: 40px; background: var(--sand); }
+
+.total-box {
+  background: var(--navy); border-radius: 14px; padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.total-box-label {
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.6);
+}
+
+.total-box-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+}
+
+.total-box-value.pos { color: var(--amber-light); }
+.total-box-value.neg { color: #f0b8a8; }
+
+.summary-hero {
+  background: var(--navy);
+  border-radius: 16px; padding: 20px;
+  margin-bottom: 16px;
+}
+
+.summary-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px;
+}
+
+.summary-hero-sub {
+  font-size: 12px; font-style: italic; color: rgba(255,255,255,0.5);
+}
+
+.summary-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+
+.summary-card {
+  border-radius: 14px; overflow: hidden;
+  border: 1.5px solid var(--sand);
+}
+
+.summary-card-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.summary-card-a .summary-card-header { background: var(--navy); }
+.summary-card-b .summary-card-header { background: var(--terra); }
+.summary-card-c .summary-card-header { background: var(--forest); }
+
+.summary-card-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 700; color: #fff;
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin-right: 10px;
+}
+
+.summary-card-score {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+}
+
+.score-pos-light { color: var(--amber-light); }
+.score-neg-light { color: #f0b8a8; }
+
+.summary-card-rank {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.55); margin-top: 2px;
+}
+
+.summary-card-body { background: var(--warm); padding: 14px 16px; }
+
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+}
+
+.summary-row:last-child { border-bottom: none; }
+.summary-row-label { color: var(--muted); font-style: italic; }
+.summary-row-val { font-family: 'Nunito', sans-serif; font-weight: 700; }
+.val-pos { color: var(--pos); }
+.val-neg { color: var(--neg); }
+.val-signal { color: var(--signal); }
+
+.analysis-section {
+  background: var(--warm); border: 1.5px solid var(--sand);
+  border-radius: 14px; padding: 16px; margin-bottom: 14px;
+}
+
+.analysis-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 6px;
+}
+
+.analysis-body {
+  font-size: 13px; line-height: 1.7; color: var(--muted);
+  font-style: italic; margin-bottom: 12px;
+}
+
+.signal-list { display: flex; flex-direction: column; gap: 8px; }
+
+.signal-item {
+  background: #fdf0f0; border: 1px solid #e8c0c0;
+  border-radius: 10px; padding: 10px 12px;
+}
+
+.signal-item-code {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--signal); margin-bottom: 3px;
+}
+
+.signal-item-text { font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+
+.congruence-scale {
+  display: flex; border-radius: 10px; overflow: hidden;
+  height: 40px; border: 1.5px solid var(--sand); margin: 12px 0;
+}
+
+.con-seg {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  cursor: pointer; transition: opacity 0.15s;
+}
+
+.con-neg { background: var(--neg-bg); color: var(--neg); }
+.con-mid { background: var(--sand); color: var(--muted); }
+.con-pos { background: var(--pos-bg); color: var(--pos); }
+.con-seg.selected { opacity: 1; filter: saturate(1.5) brightness(0.9); }
+.con-seg:not(.selected) { opacity: 0.5; }
+
+.share-area {
+  background: var(--warm); border: 1.5px solid var(--sand);
+  border-radius: 14px; padding: 16px; margin-bottom: 14px;
+}
+
+.share-title {
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--navy); margin-bottom: 12px;
+}
+
+.share-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.share-btn {
+  padding: 12px 8px; border-radius: 12px; border: none;
+  cursor: pointer; text-align: center; transition: transform 0.1s;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+
+.share-btn:active { transform: scale(0.96); }
+
+.share-btn-copy { background: var(--navy); }
+.share-btn-email { background: var(--amber); }
+.share-btn-print { background: var(--terra); }
+.share-btn-share { background: var(--forest); }
+.share-btn-reset { background: var(--warm); border: 1.5px solid var(--sand) !important; }
+
+.share-btn-icon { font-size: 20px; }
+.share-btn-label {
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+}
+
+.share-btn-copy .share-btn-label,
+.share-btn-print .share-btn-label,
+.share-btn-share .share-btn-label { color: #fff; }
+.share-btn-reset .share-btn-label { color: var(--neg); }
+
+.toast {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: var(--ink); color: #fff;
+  padding: 12px 22px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+  pointer-events: none; opacity: 0;
+  transition: all 0.2s;
+  z-index: 100;
+  white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+.step-dots {
+  display: flex; justify-content: center; gap: 6px; margin-bottom: 20px;
+}
+
+.step-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sand);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.step-dot.active { background: var(--terra); transform: scale(1.25); }
+.step-dot.done { background: var(--amber); }
+
+.mentor-note {
+  background: rgba(44,62,90,0.07);
+  border-left: 3px solid var(--navy);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px; margin-bottom: 14px;
+  font-size: 12.5px; font-style: italic;
+  color: var(--muted); line-height: 1.6;
+}
+
+.mentor-note strong {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--navy); display: block; margin-bottom: 4px; font-style: normal;
+}
+
+.example-box {
+  background: rgba(212,137,26,0.07);
+  border: 1px dashed var(--amber);
+  border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 14px;
+  font-size: 12px; line-height: 1.65;
+  color: var(--muted);
+}
+
+.example-box-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--amber); display: block;
+  margin-bottom: 6px;
+}
+
+.example-box-line {
+  font-style: italic;
+  color: var(--ink);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.example-box-note {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: normal;
+  margin-top: 6px;
+  display: block;
+}
+
+.example-rating {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 4px;
+}
+
+.example-pip {
+  background: var(--pos-bg); color: var(--pos);
+  border: 1px solid var(--pos);
+  border-radius: 6px; padding: 2px 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 700;
+}
+
+.example-pip.neg { background: var(--neg-bg); color: var(--neg); border-color: var(--neg); }
+
+.summary-card-unnamed {
+  background: var(--warm);
+  border: 1.5px dashed var(--sand);
+  border-radius: 14px; padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.summary-card-unnamed-icon {
+  font-size: 20px; flex-shrink: 0;
+}
+
+.summary-card-unnamed-text {
+  font-size: 12px; font-style: italic; color: var(--muted);
+}
+
+.daily-card {
+  background: linear-gradient(135deg, var(--terra), var(--terra-dark));
+  border-radius: 16px; padding: 20px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+
+.daily-card::before {
+  content: '';
+  position: absolute; top: -20px; right: -20px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+
+.daily-card-tag {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.65); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.daily-card-date {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.45); margin-left: auto;
+}
+
+.daily-card-arc-sub {
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px; margin-bottom: 10px;
+  font-style: italic;
+}
+
+.daily-card-arc-quote {
+  background: rgba(255,255,255,0.1);
+  border-left: 3px solid rgba(240,184,74,0.6);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-family: 'Lora', serif;
+  font-size: 13px; font-style: italic;
+  color: rgba(255,255,255,0.85); line-height: 1.6;
+}
+
+.daily-card-arc-quote-attr {
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 600;
+  color: rgba(240,184,74,0.75); margin-top: 6px; display: block;
+  font-style: normal; letter-spacing: 0.5px;
+}
+
+.daily-card-question {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(15px, 3vw, 18px); font-weight: 700;
+  font-style: italic; color: #fff;
+  line-height: 1.45; margin-bottom: 12px;
+}
+
+.daily-card-action {
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.6); font-style: italic;
+}
+
+.closing-screen {
+  display: none;
+  position: fixed; inset: 0;
+  background: var(--navy);
+  z-index: 80;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: fadeInFull 0.4s ease both;
+}
+
+.closing-screen.show { display: block; }
+
+@keyframes fadeInFull {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.closing-inner {
+  max-width: 480px; margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inset-bottom, 0px) + 48px);
+  text-align: center; position: relative;
+}
+
+.closing-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,137,26,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.closing-icon { font-size: 48px; margin-bottom: 20px; }
+
+.closing-tag {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--amber-light); opacity: 0.7; margin-bottom: 14px;
+}
+
+.closing-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 6vw, 36px); font-weight: 700;
+  color: #fff; line-height: 1.15; margin-bottom: 14px;
+}
+
+.closing-title em { font-style: italic; color: var(--amber-light); }
+
+.closing-choice-box {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(240,184,74,0.25);
+  border-radius: 12px; padding: 14px 18px;
+  margin: 16px 0 20px;
+  font-size: 14px; font-style: italic;
+  color: rgba(255,255,255,0.8); line-height: 1.65;
+  text-align: left;
+}
+
+.closing-choice-label {
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--amber-light); margin-bottom: 6px; display: block;
+  font-style: normal;
+}
+
+.closing-body {
+  font-size: 14px; font-style: italic;
+  color: rgba(255,255,255,0.65); line-height: 1.75;
+  margin-bottom: 20px;
+}
+
+.closing-signoff {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(14px, 2.5vw, 17px); font-style: italic;
+  color: var(--amber-light); line-height: 1.7;
+  margin-bottom: 28px; opacity: 0.9;
+}
+
+.closing-share-btn {
+  width: 100%;
+  background: var(--terra); border: none;
+  border-radius: 14px; padding: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #fff; cursor: pointer; margin-bottom: 10px;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+
+.closing-share-btn:active { background: var(--terra-dark); }
+
+.closing-new-btn {
+  width: 100%;
+  background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 14px; padding: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: rgba(255,255,255,0.8); cursor: pointer;
+  transition: background 0.15s;
+}
+
+.closing-new-btn:active { background: rgba(255,255,255,0.18); }
+
+.reset-confirm {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 90;
+  align-items: flex-end; justify-content: center;
+  animation: fadeOverlay 0.2s ease;
+}
+
+.reset-confirm.show { display: flex; }
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.reset-confirm-panel {
+  background: var(--warm);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  width: 100%; max-width: 500px;
+  animation: slideUpPanel 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideUpPanel {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.reset-confirm-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--ink); margin-bottom: 8px; text-align: center;
+}
+
+.reset-confirm-body {
+  font-size: 13.5px; font-style: italic;
+  color: var(--muted); line-height: 1.65;
+  text-align: center; margin-bottom: 20px;
+}
+
+.reset-confirm-btns { display: flex; flex-direction: column; gap: 10px; }
+
+.reset-confirm-yes {
+  background: var(--neg); border: none; border-radius: 14px;
+  padding: 16px; font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; cursor: pointer;
+}
+
+.reset-confirm-no {
+  background: var(--warm); border: 1.5px solid var(--sand);
+  border-radius: 14px; padding: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer;
+}
+
+.share-btn-friend { background: var(--amber); }
+.share-btn-friend .share-btn-label { color: var(--ink) !important; }
+
+.install-banner {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--navy);
+  padding: 14px 16px calc(var(--safe-bot) + 14px);
+  display: none; align-items: center; gap: 12px;
+  z-index: 50;
+  border-top: 1px solid rgba(240,184,74,0.2);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+}
+
+.install-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--terra), var(--amber));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+
+.install-text { flex: 1; }
+
+.install-title {
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  color: #fff; margin-bottom: 2px;
+}
+
+.install-sub {
+  font-family: 'Nunito', sans-serif; font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+
+.install-btn {
+  background: var(--amber); border: none; border-radius: 10px;
+  padding: 8px 14px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--ink); cursor: pointer; flex-shrink: 0;
+}
+
+.install-dismiss {
+  background: none; border: none;
+  color: rgba(255,255,255,0.4); font-size: 18px;
+  cursor: pointer; flex-shrink: 0; padding: 4px;
+}
+
+@media print {
+  .topbar, .progress-wrap, .bottom-nav, .share-btns, .home-actions,
+  .voice-btn-wrap, .install-banner { display: none !important; }
+  body { overflow: visible; }
+  #app { height: auto; overflow: visible; }
+  .scroll-area { overflow: visible; padding-bottom: 20px; }
+  .screen { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar" id="topbar">
+    <button class="topbar-back" id="backBtn" onclick="goBack()" style="display:none">←</button>
+    <div class="topbar-info">
+      <div class="topbar-title" id="topbarTitle">The C<sup>3</sup>hoice Lab</div>
+      <div class="topbar-sub" id="topbarSub">C³ = C : C → C</div>
+    </div>
+    <button class="topbar-save" id="saveBtn" onclick="saveProgress()" style="display:none">Save</button>
+    <div class="voice-btn-wrap" id="voiceBtnWrap" style="display:none">
+      <button class="voice-btn" id="voiceBtn" onclick="speakCurrentScreen()">🔊</button>
+      <div class="voice-btn-label">Mentor</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Step 1 of 12</div>
+  </div>
+
+  <div class="scroll-area" id="scrollArea">
+
+    <!-- ══════ HOME ══════ -->
+    <div class="screen active" id="screen-home">
+      <div class="home-hero">
+        <div class="home-hero-inner">
+          <div class="home-tag">Steve, The Hopeful Humanist · The Choice Project</div>
+          <div class="home-title">The C<sup style="font-size:0.65em;vertical-align:super;">3</sup><em>hoice Lab</em></div>
+          <p class="home-sub">A rigorous, warm tool for complex choices — when the stakes are high enough to deserve a closer look.</p>
+          <div class="home-formula">
+            <div class="home-formula-text">C³ = C : C → C</div>
+            <div class="home-formula-sub">Circumstance · Choice · Consequence</div>
+          </div>
+          <div style="font-family:'Nunito',sans-serif;font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);margin-top:12px;letter-spacing:0.5px;">🔒 Your data never leaves your device.</div>
+          <div style="font-family:'Nunito',sans-serif;font-size:9px;color:rgba(255,255,255,0.25);margin-top:6px;font-style:italic;padding:0 10px;">This tool is for reflection only — not professional advice. You are the one who chooses.</div>
+          <div style="font-family:'Nunito',sans-serif;font-size:9px;color:rgba(255,255,255,0.22);margin-top:6px;font-style:italic;padding:0 10px;">Progress is saved to this browser only. Clearing your browser data or switching browsers will erase it. For a permanent record, use Email or Copy on the summary screen.</div>
+        </div>
+      </div>
+
+      <div class="daily-card" id="dailyCard">
+        <div class="daily-card-tag">
+          <span id="dailyArcTag">✦ Today's Choice Prompt</span>
+          <span class="daily-card-date" id="dailyDate"></span>
+        </div>
+        <div class="daily-card-arc-sub" id="dailyArcSub"></div>
+        <div class="daily-card-arc-quote" id="dailyArcQuote" style="display:none"></div>
+        <div class="daily-card-question" id="dailyQuestion"></div>
+        <div class="daily-card-action">Sit with this today — no need to answer out loud.</div>
+      </div>
+
+      <div class="home-actions">
+        <button class="home-btn home-btn-new" onclick="startNew()">
+          <div class="home-btn-icon">🔬</div>
+          <div class="home-btn-text">
+            <span class="home-btn-label">Start a New Decision</span>
+            <span class="home-btn-desc">Name the situation and work through three options</span>
+          </div>
+          <div class="home-btn-arrow">→</div>
+        </button>
+        <button class="home-btn home-btn-continue" id="continueBtn" onclick="loadProgress()" style="display:none">
+          <div class="home-btn-icon">📋</div>
+          <div class="home-btn-text">
+            <span class="home-btn-label">Continue Where I Left Off</span>
+            <span class="home-btn-desc" id="continueSub">Resume your saved decision</span>
+          </div>
+          <div class="home-btn-arrow">→</div>
+        </button>
+        <button class="home-btn-share-app" onclick="shareAppLink()">
+          <div class="home-btn-share-app-icon">🔗</div>
+          <div class="home-btn-share-app-text">
+            <span class="home-btn-share-app-label">Share the C³hoice Lab</span>
+            <span class="home-btn-share-app-desc">Send this tool to someone who needs it</span>
+          </div>
+          <div class="home-btn-share-app-arrow">→</div>
+        </button>
+        <button class="home-btn-share-app" onclick="openChoiceCards()">
+          <div class="home-btn-share-app-icon">🃏</div>
+          <div class="home-btn-share-app-text">
+            <span class="home-btn-share-app-label">Explore the C³ Choice Cards</span>
+            <span class="home-btn-share-app-desc">Twelve navigation points — and a daily draw</span>
+          </div>
+          <div class="home-btn-share-app-arrow">→</div>
+        </button>
+      </div>
+
+      <div class="home-info-cards" id="infoCards">
+        <div class="home-info-card" onclick="toggleInfo('options')" id="card-options">
+          <div class="home-info-num">3</div>
+          <div class="home-info-label">Options</div>
+          <div class="home-info-tap">tap to learn more</div>
+        </div>
+        <div class="home-info-card" onclick="toggleInfo('considerations')" id="card-considerations">
+          <div class="home-info-num">30</div>
+          <div class="home-info-label">Considerations</div>
+          <div class="home-info-tap">tap to learn more</div>
+        </div>
+        <div class="home-info-card" onclick="toggleInfo('levels')" id="card-levels">
+          <div class="home-info-num">3</div>
+          <div class="home-info-label">Analysis Levels</div>
+          <div class="home-info-tap">tap to learn more</div>
+        </div>
+        <div class="home-info-card" onclick="toggleInfo('rating')" id="card-rating">
+          <div class="home-info-num">±5</div>
+          <div class="home-info-label">Rating Scale</div>
+          <div class="home-info-tap">tap to learn more</div>
+        </div>
+      </div>
+
+      <div class="home-info-expand" id="expand-options">
+        <div class="expand-title">What is an Option?</div>
+        <div class="expand-body">An option is a real path available to you right now — not a wish, not a fantasy. A genuine road you could actually take. The lab asks you to name three, because one isn't a real choice, two creates a false either/or, and three forces honest thinking about what is actually in front of you.</div>
+      </div>
+      <div class="home-info-expand" id="expand-considerations">
+        <div class="expand-title">What are Considerations?</div>
+        <div class="expand-body">For each option you identify up to five things that speak for it — and five that speak against it. Across three options that's up to 30 considerations in total. Each one gets a rating from 1 to 5. The more honest you are about what actually influences you — including the uncomfortable things — the more useful the map becomes.</div>
+      </div>
+      <div class="home-info-expand" id="expand-levels">
+        <div class="expand-title">What are the 3 Analysis Levels?</div>
+        <div class="expand-body">Once your considerations are rated, the lab runs three levels of analysis. Level I ranks your options by total score. Level II flags your critical signals — anything rated ±5 that demands closer attention. Level III counts the full complexity of your decision and checks whether you have been fully honest with yourself.</div>
+      </div>
+      <div class="home-info-expand" id="expand-rating">
+        <div class="expand-title">What does ±5 mean?</div>
+        <div class="expand-body">Every consideration gets a rating. A 1 means it is a mild factor — worth noting but not decisive. A 5 means it matters deeply — a critical signal that speaks louder than any average. The scale runs from +5 for the strongest pros to −5 for the most serious cons. Rate honestly, not strategically. Your gut knows the difference.</div>
+      </div>
+    </div>
+
+    <!-- ══════ SITUATION ══════ -->
+    <div class="screen" id="screen-situation">
+      <div class="step-dots" id="dots-situation"></div>
+      <div class="screen-heading">Name the <em>Situation</em></div>
+      <p class="screen-sub">Start by simply naming what you are facing — the problem, challenge, dilemma, conflict, or issue. Raw and honest. Just get it out.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example</span>
+        <span class="example-box-line">I am 15 and already designing hats and beanies. I can start selling now using print-on-demand, but it is expensive and risky. If I wait, I could save money and maybe do it better later.</span>
+        <span class="example-box-line" style="margin-top:8px;"><strong style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);font-style:normal;">Reframed as a point of decision:</strong> I am at a moment of choice about whether to start building my clothing brand now or wait and save.</span>
+        <span class="example-box-line" style="margin-top:8px;"><strong style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);font-style:normal;">Guiding values:</strong> Learning, financial security, not wasting money</span>
+        <span class="example-box-note">Write your situation as it actually is — messy and unresolved is fine. Then reframe it as a fork you are standing at.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">What is the problem, challenge, or dilemma?</label>
+        <textarea class="field-input" id="sit-desc" placeholder="Describe what you are facing — the situation as it actually is..."></textarea>
+      </div>
+      <div class="mentor-note">
+        <strong>Mentor Note</strong>
+        Don't edit yourself here. Write it as you would tell a trusted friend — messy, uncertain, unresolved. That honesty is what makes the next step possible.
+      </div>
+      <div class="field-group" style="margin-top:20px;">
+        <label class="field-label">Now reframe it — turn it into a point of decision</label>
+        <input class="field-input" id="sit-reframe" type="text" placeholder="I am at a moment of choice about...">
+      </div>
+      <div class="mentor-note">
+        <strong>Why this matters</strong>
+        This single act — reframing your situation as a point of decision — is the Dawning of Agency. You are no longer a passenger. You are at a fork. The problem hasn't changed. But your relationship to it just did.
+      </div>
+      <div class="field-group" style="margin-top:20px;">
+        <label class="field-label">What two or three things matter most to you in this decision?</label>
+        <input class="field-input" id="sit-values" type="text" placeholder="e.g. Learning, financial security, freedom...">
+      </div>
+      <div class="mentor-note">
+        <strong>Your Guiding Values</strong>
+        Name what actually matters to you — not what should matter or what sounds good. These values will anchor your ratings and make the alignment check at the end more meaningful. How you rate each consideration should reflect these.
+      </div>
+    </div>
+
+    <!-- ══════ OPTIONS ══════ -->
+    <div class="screen" id="screen-alt-a-name">
+      <div class="step-dots" id="dots-alt-a-name"></div>
+      <div class="alt-badge badge-a">🔵 Option A</div>
+      <div class="screen-heading">Name your <em>first option</em></div>
+      <p class="screen-sub">An option is a real path you could actually take — not a wish or a fantasy. Given where you are right now, what is one genuine road available to you?</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option A</span>
+        <span class="example-box-line">Start now with print-on-demand — list one hat design this month and see if anyone buys it.</span>
+        <span class="example-box-note">Be specific. A good option names what you would actually do, not just a general direction.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Option A — Describe this path</label>
+        <textarea class="field-input" id="alt-a-name" placeholder="What is this option? Describe it clearly..."></textarea>
+      </div>
+      <div class="mentor-note">
+        <strong>What makes a good option?</strong>
+        It must be real and genuinely available to you right now. "Win the lottery" is not an option. "Do nothing" is — and it too has consequences.
+      </div>
+    </div>
+
+    <div class="screen" id="screen-alt-b-name">
+      <div class="step-dots" id="dots-alt-b-name"></div>
+      <div class="alt-badge badge-b">🔴 Option B</div>
+      <div class="screen-heading">Name your <em>second option</em></div>
+      <p class="screen-sub">This should be a genuinely different path — not a minor variation of Option A. A real second road that leads somewhere different.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option B</span>
+        <span class="example-box-line">Wait 6–12 months, save money, then launch properly with bulk inventory and better margins.</span>
+        <span class="example-box-note">Option B should lead somewhere genuinely different — not just a slower version of Option A.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Option B — Describe this path</label>
+        <textarea class="field-input" id="alt-b-name" placeholder="What is this option? Describe it clearly..."></textarea>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-alt-c-name">
+      <div class="step-dots" id="dots-alt-c-name"></div>
+      <div class="alt-badge badge-c">🟢 Option C</div>
+      <div class="screen-heading">Name your <em>third option</em></div>
+      <p class="screen-sub">Three options force real thinking. Consider the one you have been quietly avoiding naming — the path that feels too risky, too unconventional, or too honest to say out loud.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option C</span>
+        <span class="example-box-line">Start with just one design as a low-cost test — spend under $50, learn what I can, and decide from there.</span>
+        <span class="example-box-note">This is often the option people skip. It is sometimes the most honest one — and the most useful to name.</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Option C — Describe this path</label>
+        <textarea class="field-input" id="alt-c-name" placeholder="What is this option? Describe it clearly..."></textarea>
+      </div>
+    </div>
+
+    <!-- ══════ ASPECTS ══════ -->
+    <div class="screen" id="screen-aspects-a">
+      <div class="step-dots" id="dots-aspects-a"></div>
+      <div class="alt-badge badge-a">🔵 Option A — Pros &amp; Cons</div>
+      <div id="aspects-a-name-display" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px;line-height:1.3;display:none;"></div>
+      <div class="screen-heading">Map the <em>pros and cons</em></div>
+      <p class="screen-sub">Write what genuinely influences you about this option — what speaks for it, and what speaks against it. Rate each from 1 (mild) to 5 (critical). Be honest, especially about the uncomfortable ones.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option A pros and cons</span>
+        <span class="example-box-line">✚ Pro: Start learning business skills immediately <span class="example-rating"><span class="example-pip">+4</span></span></span>
+        <span class="example-box-line">✚ Pro: People already like my hat designs <span class="example-rating"><span class="example-pip">+3</span></span></span>
+        <span class="example-box-line">✖ Con: Might lose money if designs do not sell <span class="example-rating"><span class="example-pip neg">−4</span></span></span>
+        <span class="example-box-line">✖ Con: High costs per product <span class="example-rating"><span class="example-pip neg">−3</span></span></span>
+        <span class="example-box-note">Rate 5 only if this consideration alone could change your decision. Rate 1 if it barely matters.</span>
+      </div>
+      <div id="aspects-a-container"></div>
+    </div>
+
+    <div class="screen" id="screen-aspects-b">
+      <div class="step-dots" id="dots-aspects-b"></div>
+      <div class="alt-badge badge-b">🔴 Option B — Pros &amp; Cons</div>
+      <div id="aspects-b-name-display" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--terra);margin-bottom:4px;line-height:1.3;display:none;"></div>
+      <div class="screen-heading">Map the <em>pros and cons</em></div>
+      <p class="screen-sub">What speaks for this option — and what speaks against it? Same honest treatment as Option A. The comparison only works if all three are equally truthful.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option B pros and cons</span>
+        <span class="example-box-line">✚ Pro: Higher profit margins with bulk ordering later <span class="example-rating"><span class="example-pip">+4</span></span></span>
+        <span class="example-box-line">✚ Pro: Less financial stress while saving <span class="example-rating"><span class="example-pip">+3</span></span></span>
+        <span class="example-box-line">✖ Con: Might lose motivation over 6–12 months <span class="example-rating"><span class="example-pip neg">−4</span></span></span>
+        <span class="example-box-line">✖ Con: No real-world experience during waiting period <span class="example-rating"><span class="example-pip neg">−4</span></span></span>
+        <span class="example-box-note">Give Option B the same honest treatment as Option A — do not go easier on it or harder on it.</span>
+      </div>
+      <div id="aspects-b-container"></div>
+    </div>
+
+    <div class="screen" id="screen-aspects-c">
+      <div class="step-dots" id="dots-aspects-c"></div>
+      <div class="alt-badge badge-c">🟢 Option C — Pros &amp; Cons</div>
+      <div id="aspects-c-name-display" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--forest);margin-bottom:4px;line-height:1.3;display:none;"></div>
+      <div class="screen-heading">Map the <em>pros and cons</em></div>
+      <p class="screen-sub">Last one. Be as honest here as you were in the first two — especially if this is the option you've been quietly avoiding naming.</p>
+      <div class="example-box">
+        <span class="example-box-label">Example — Option C pros and cons</span>
+        <span class="example-box-line">✚ Pro: Low financial risk — test with minimal spend <span class="example-rating"><span class="example-pip">+4</span></span></span>
+        <span class="example-box-line">✚ Pro: Generates real data before committing fully <span class="example-rating"><span class="example-pip">+5</span></span></span>
+        <span class="example-box-line">✖ Con: Limited scale — can only test one design <span class="example-rating"><span class="example-pip neg">−2</span></span></span>
+        <span class="example-box-note">Sometimes the most honest pros and cons belong to the option you almost did not name.</span>
+      </div>
+      <div id="aspects-c-container"></div>
+    </div>
+
+    <!-- ══════ SCORES ══════ -->
+    <div class="screen" id="screen-scores-a">
+      <div class="step-dots" id="dots-scores-a"></div>
+      <div class="alt-badge badge-a">🔵 Option A — Score</div>
+      <div class="screen-heading">Option A <em>Total</em></div>
+      <div class="score-card" id="score-a-card">
+        <div class="score-col">
+          <div class="score-val pos" id="score-a-pos">+0</div>
+          <div class="score-lbl">Positive Total</div>
+        </div>
+        <div class="score-divider"></div>
+        <div class="score-col">
+          <div class="score-val neg" id="score-a-neg">−0</div>
+          <div class="score-lbl">Negative Total</div>
+        </div>
+      </div>
+      <div class="total-box">
+        <div class="total-box-label">Option A Total</div>
+        <div class="total-box-value" id="total-a-val">0</div>
+      </div>
+      <div id="signals-a"></div>
+    </div>
+
+    <div class="screen" id="screen-scores-b">
+      <div class="step-dots" id="dots-scores-b"></div>
+      <div class="alt-badge badge-b">🔴 Option B — Score</div>
+      <div class="screen-heading">Option B <em>Total</em></div>
+      <div class="score-card">
+        <div class="score-col">
+          <div class="score-val pos" id="score-b-pos">+0</div>
+          <div class="score-lbl">Positive Total</div>
+        </div>
+        <div class="score-divider"></div>
+        <div class="score-col">
+          <div class="score-val neg" id="score-b-neg">−0</div>
+          <div class="score-lbl">Negative Total</div>
+        </div>
+      </div>
+      <div class="total-box">
+        <div class="total-box-label">Option B Total</div>
+        <div class="total-box-value" id="total-b-val">0</div>
+      </div>
+      <div id="signals-b"></div>
+    </div>
+
+    <div class="screen" id="screen-scores-c">
+      <div class="step-dots" id="dots-scores-c"></div>
+      <div class="alt-badge badge-c">🟢 Option C — Score</div>
+      <div class="screen-heading">Option C <em>Total</em></div>
+      <div class="score-card">
+        <div class="score-col">
+          <div class="score-val pos" id="score-c-pos">+0</div>
+          <div class="score-lbl">Positive Total</div>
+        </div>
+        <div class="score-divider"></div>
+        <div class="score-col">
+          <div class="score-val neg" id="score-c-neg">−0</div>
+          <div class="score-lbl">Negative Total</div>
+        </div>
+      </div>
+      <div class="total-box">
+        <div class="total-box-label">Option C Total</div>
+        <div class="total-box-value" id="total-c-val">0</div>
+      </div>
+      <div id="signals-c"></div>
+    </div>
+
+    <!-- ══════ SUMMARY ══════ -->
+    <div class="screen" id="screen-summary">
+      <div class="summary-hero">
+        <div class="summary-hero-title">Your Decision Map</div>
+        <div class="summary-hero-sub">Three options. All the data. Here is what you've found.</div>
+      </div>
+      <div class="summary-cards" id="summary-cards"></div>
+      <div class="analysis-section">
+        <div class="analysis-title">Critical Signals</div>
+        <div class="analysis-body">Any pro or con rated ±5 is a critical signal — your strongest conviction about this decision. Never average it away.</div>
+        <div class="signal-list" id="all-signals"></div>
+      </div>
+      <div class="analysis-section">
+        <div class="analysis-title">Complexity Count</div>
+        <div class="analysis-body" id="complexity-text"></div>
+      </div>
+      <div class="analysis-section">
+        <div class="analysis-title">Alignment Check</div>
+        <div class="analysis-body">Alignment means congruence between this option and your inner self. Does it line up with your needs, your beliefs, your values, your interests, your intentions, and your strengths? The highest-scoring option is not automatically the right one. This is the most important question in the entire lab.</div>
+        <div class="analysis-body" id="alignment-values-note" style="margin-top:-6px;display:none;"></div>
+        <div class="congruence-scale">
+          <div class="con-seg con-neg" onclick="setCongruence('neg', this)">Doesn't feel right</div>
+          <div class="con-seg con-mid selected" onclick="setCongruence('mid', this)">Not sure yet</div>
+          <div class="con-seg con-pos" onclick="setCongruence('pos', this)">Feels aligned</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">The most aligned option is — and why:</label>
+          <textarea class="field-input" id="congruence-note" placeholder="Write your honest answer here..." style="min-height:80px;"></textarea>
+        </div>
+      </div>
+      <div class="analysis-section">
+        <div class="analysis-title">Choose &amp; Act</div>
+        <div class="analysis-body">You have done the work. Now you choose — and you own it fully.</div>
+        <div class="field-group">
+          <label class="field-label">I choose Option ___ because:</label>
+          <textarea class="field-input" id="final-choice" placeholder="Write your decision and reasoning here..." style="min-height:100px;"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">The specific action I am committing to — and when:</label>
+          <textarea class="field-input" id="action-commit" placeholder="Be specific. What exactly will you do, and by when?" style="min-height:70px;"></textarea>
+        </div>
+      </div>
+      <div class="share-area">
+        <div class="share-title">Share &amp; Export</div>
+        <div class="share-btns">
+          <button class="share-btn share-btn-copy" onclick="copyResults()">
+            <div class="share-btn-icon">📋</div>
+            <div class="share-btn-label">Copy Text</div>
+          </button>
+          <button class="share-btn share-btn-email" onclick="emailResults()">
+            <div class="share-btn-icon">✉️</div>
+            <div class="share-btn-label">Email to Me</div>
+          </button>
+          <button class="share-btn share-btn-print" onclick="window.print()">
+            <div class="share-btn-icon">🖨️</div>
+            <div class="share-btn-label">Print / PDF</div>
+          </button>
+          <button class="share-btn share-btn-share" onclick="shareResults()">
+            <div class="share-btn-icon">↗️</div>
+            <div class="share-btn-label">Share</div>
+          </button>
+          <button class="share-btn share-btn-friend" onclick="shareWithFriend()">
+            <div class="share-btn-icon">👥</div>
+            <div class="share-btn-label">Send to Friend</div>
+          </button>
+          <button class="share-btn share-btn-reset" onclick="confirmReset()" style="grid-column: span 2;">
+            <div class="share-btn-icon">🗑️</div>
+            <div class="share-btn-label" style="color:var(--neg);">Start Over</div>
+          </button>
+        </div>
+      </div>
+      <div style="text-align:center;padding:24px 0 8px;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--amber);line-height:1.7;">
+          May the choices you make be the wisest ones possible<br>in the moments you meet them.
+        </div>
+        <div style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px;">
+          Steve, The Hopeful Humanist · The Choice Project
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav" id="bottomNav" style="display:none">
+    <button class="btn-secondary" id="btnBack2" onclick="goBack()">← Back</button>
+    <button class="btn-primary" id="btnNext" onclick="goNext()">Continue →</button>
+  </div>
+
+<div class="closing-screen" id="closingScreen">
+  <div class="closing-inner">
+    <div class="closing-glow"></div>
+    <div class="closing-icon">🔬</div>
+    <div class="closing-tag">The C<sup>3</sup>hoice Lab · Complete</div>
+    <h2 class="closing-title">You have <em>chosen.</em></h2>
+    <div class="closing-choice-box" id="closingChoiceBox">
+      <span class="closing-choice-label">Your Decision</span>
+      <span id="closingChoiceText"></span>
+    </div>
+    <div class="closing-body" id="closingBody"></div>
+    <div class="closing-signoff">
+      May the choices you make be the wisest ones possible<br>in the moments you meet them.
+    </div>
+    <button class="closing-share-btn" onclick="shareWithFriend()">
+      <span>↗️</span> Share My Results with a Friend
+    </button>
+    <button class="closing-share-btn" onclick="shareAppLink()" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);margin-bottom:10px;">
+      <span>🔗</span> Share the App with a Friend
+    </button>
+    <button class="closing-new-btn" onclick="closingStartOver()">Start a New Decision</button>
+  </div>
+</div>
+
+<div class="reset-confirm" id="resetConfirm" onclick="dismissReset(event)">
+  <div class="reset-confirm-panel">
+    <div class="reset-confirm-title">Start Over?</div>
+    <div class="reset-confirm-body">Your current decision and all your work will be cleared. This cannot be undone.</div>
+    <div class="reset-confirm-btns">
+      <button class="reset-confirm-yes" onclick="executeReset()">Yes — clear everything and start fresh</button>
+      <button class="reset-confirm-no" onclick="dismissReset()">No — go back</button>
+    </div>
+  </div>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <div class="install-icon">🔬</div>
+  <div class="install-text">
+    <div class="install-title">Add to Home Screen</div>
+    <div class="install-sub">Use the C<sup>3</sup>hoice Lab like a native app</div>
+  </div>
+  <button class="install-btn" onclick="installPWA()">Install</button>
+  <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  currentScreen: 'home',
+  situation: { desc: '', reframe: '', values: '' },
+  alts: { a: { name: '' }, b: { name: '' }, c: { name: '' } },
+  aspects: {
+    a: { pos: Array(5).fill({text:'',rating:0}), neg: Array(5).fill({text:'',rating:0}) },
+    b: { pos: Array(5).fill({text:'',rating:0}), neg: Array(5).fill({text:'',rating:0}) },
+    c: { pos: Array(5).fill({text:'',rating:0}), neg: Array(5).fill({text:'',rating:0}) }
+  },
+  congruence: 'mid',
+  congruenceNote: '',
+  finalChoice: '',
+  actionCommit: ''
+};
+
+function initAspects() {
+  ['a','b','c'].forEach(alt => {
+    state.aspects[alt].pos = Array(5).fill(null).map(() => ({text:'',rating:0}));
+    state.aspects[alt].neg = Array(5).fill(null).map(() => ({text:'',rating:0}));
+  });
+}
+initAspects();
+
+const SCREENS = [
+  'home','situation',
+  'alt-a-name','alt-b-name','alt-c-name',
+  'aspects-a','aspects-b','aspects-c',
+  'scores-a','scores-b','scores-c','summary'
+];
+
+function showScreen(name, direction = 'forward') {
+  if (typeof stopSpeaking === 'function') stopSpeaking();
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active','slide-forward','slide-back');
+  });
+  const el = document.getElementById('screen-' + name);
+  if (el) {
+    el.classList.add('active');
+    el.classList.add(direction === 'back' ? 'slide-back' : 'slide-forward');
+    el.addEventListener('animationend', () => {
+      el.classList.remove('slide-forward','slide-back');
+    }, { once: true });
+  }
+  document.getElementById('scrollArea').scrollTop = 0;
+  state.currentScreen = name;
+
+  const isHome = name === 'home';
+  document.getElementById('backBtn').style.display = isHome ? 'none' : 'flex';
+  document.getElementById('saveBtn').style.display = isHome ? 'none' : 'flex';
+  document.getElementById('progressWrap').style.display = isHome ? 'none' : 'block';
+  document.getElementById('bottomNav').style.display = isHome ? 'none' : 'flex';
+
+  const voiceBtnWrap = document.getElementById('voiceBtnWrap');
+  if (voiceBtnWrap) voiceBtnWrap.style.display = isHome ? 'none' : 'flex';
+
+  if (!isHome) {
+    const idx = SCREENS.indexOf(name);
+    const pct = Math.round((idx / (SCREENS.length - 1)) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `Step ${idx} of ${SCREENS.length - 1}`;
+    updateTopbar(name);
+    updateDots(name, idx);
+    const isLast = name === 'summary';
+    document.getElementById('btnNext').textContent = isLast ? 'Done ✓' : 'Continue →';
+    document.getElementById('btnBack2').style.display = idx <= 1 ? 'none' : 'flex';
+  }
+
+  if (name === 'aspects-a') {
+    buildAspects('a');
+    const el = document.getElementById('aspects-a-name-display');
+    if (el && state.alts.a.name) { el.textContent = state.alts.a.name; el.style.display = 'block'; }
+  }
+  if (name === 'aspects-b') {
+    buildAspects('b');
+    const el = document.getElementById('aspects-b-name-display');
+    if (el && state.alts.b.name) { el.textContent = state.alts.b.name; el.style.display = 'block'; }
+  }
+  if (name === 'aspects-c') {
+    buildAspects('c');
+    const el = document.getElementById('aspects-c-name-display');
+    if (el && state.alts.c.name) { el.textContent = state.alts.c.name; el.style.display = 'block'; }
+  }
+  if (name === 'scores-a') buildScores('a');
+  if (name === 'scores-b') buildScores('b');
+  if (name === 'scores-c') buildScores('c');
+  if (name === 'summary') buildSummary();
+}
+
+function updateTopbar(name) {
+  const titles = {
+    'situation': ['The Situation','Step 1 of 11'],
+    'alt-a-name': ['Option A','Step 2 of 11'],
+    'alt-b-name': ['Option B','Step 3 of 11'],
+    'alt-c-name': ['Option C','Step 4 of 11'],
+    'aspects-a': ['Option A — Pros & Cons','Step 5 of 11'],
+    'aspects-b': ['Option B — Pros & Cons','Step 6 of 11'],
+    'aspects-c': ['Option C — Pros & Cons','Step 7 of 11'],
+    'scores-a': ['Option A — Score','Step 8 of 11'],
+    'scores-b': ['Option B — Score','Step 9 of 11'],
+    'scores-c': ['Option C — Score','Step 10 of 11'],
+    'summary': ['Your Decision Map','Step 11 of 11'],
+  };
+  const t = titles[name] || ['The C3hoice Lab','C³ = C : C → C'];
+  document.getElementById('topbarTitle').textContent = t[0];
+  document.getElementById('topbarSub').textContent = t[1];
+}
+
+function updateDots(name, activeIdx) {
+  const el = document.getElementById('dots-' + name);
+  if (!el) return;
+  el.innerHTML = '';
+  SCREENS.slice(1).forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'step-dot' + (i+1 === activeIdx ? ' active' : (i+1 < activeIdx ? ' done' : ''));
+    el.appendChild(d);
+  });
+}
+
+function goNext() {
+  saveCurrentFields();
+  try { localStorage.setItem('decisionlab_state', JSON.stringify(state)); } catch(e) {}
+  const idx = SCREENS.indexOf(state.currentScreen);
+  if (state.currentScreen === 'summary') {
+    showClosingScreen();
+  } else if (idx < SCREENS.length - 1) {
+    showScreen(SCREENS[idx + 1], 'forward');
+  }
+}
+
+function showClosingScreen() {
+  saveCurrentFields();
+  const choice = state.finalChoice || '';
+  const commit = state.actionCommit || '';
+  let body = '';
+  if (choice) {
+    body = 'You worked through the full map — named your options, rated your considerations, identified what matters most — and then you chose. That is not a small thing.';
+    if (commit) body += ' You have committed to a specific action. Hold that. Write it somewhere you will see it.';
+  } else {
+    body = 'You have done the hard work of making your thinking visible. Even if your decision is not yet fully formed, you know more than when you started. That is enough for today.';
+  }
+  const choiceText = document.getElementById('closingChoiceText');
+  const bodyEl = document.getElementById('closingBody');
+  const choiceBox = document.getElementById('closingChoiceBox');
+  if (choiceText) choiceText.textContent = choice || 'Your decision is recorded in the lab.';
+  if (bodyEl) bodyEl.textContent = body;
+  if (choiceBox && !choice) choiceBox.style.display = 'none';
+  const screen = document.getElementById('closingScreen');
+  screen.classList.add('show');
+  screen.scrollTop = 0;
+  saveProgress();
+}
+
+function closingStartOver() {
+  document.getElementById('closingScreen').classList.remove('show');
+  confirmReset();
+}
+
+function confirmReset() {
+  document.getElementById('resetConfirm').classList.add('show');
+}
+
+function dismissReset(e) {
+  if (e && e.target !== document.getElementById('resetConfirm')) return;
+  document.getElementById('resetConfirm').classList.remove('show');
+}
+
+function executeReset() {
+  document.getElementById('resetConfirm').classList.remove('show');
+  document.getElementById('closingScreen').classList.remove('show');
+  try { localStorage.removeItem('decisionlab_state'); } catch(e) {}
+  Object.assign(state, {
+    currentScreen: 'home',
+    situation: { desc:'', reframe:'', values:'' },
+    alts: { a:{name:''}, b:{name:''}, c:{name:''} },
+    congruence: 'mid',
+    congruenceNote: '',
+    finalChoice: '',
+    actionCommit: ''
+  });
+  initAspects();
+  document.querySelectorAll('.field-input, .aspect-text-input').forEach(el => { el.value = ''; });
+  document.querySelectorAll('.con-seg').forEach(s => s.classList.remove('selected'));
+  const midSeg = document.querySelector('.con-seg.con-mid');
+  if (midSeg) midSeg.classList.add('selected');
+  const choiceBox = document.getElementById('closingChoiceBox');
+  if (choiceBox) choiceBox.style.display = '';
+  const continueBtn = document.getElementById('continueBtn');
+  if (continueBtn) continueBtn.style.display = 'none';
+  showScreen('home','back');
+  initDailyPrompt();
+}
+
+function openChoiceCards() {
+  const base = 'https://hopefulhumanist-chooser.github.io/c3hoice-lab/';
+  window.open(base + 'c3hoice-cards.html', '_blank');
+}
+
+function shareAppLink() {
+  const url = window.location.href.startsWith('file:')
+    ? 'https://hopefulhumanist-chooser.github.io/c3hoice-lab'
+    : window.location.href.split('?')[0];
+  const msg = `Someone shared this with me and I found it genuinely useful.\n\nThe C3hoice Lab — a tool for working through big decisions clearly and honestly. Built on a philosophy called C³: Circumstance, Choice, Consequence.\n\nFree to use, works on any phone:\n${url}\n\nCreated by Steve, The Hopeful Humanist.\nPodcast: The Hopeful Humanist Café — hopefulhumanistcafe.com`;
+  if (navigator.share) {
+    navigator.share({ title: 'The C3hoice Lab', text: 'A tool for working through big decisions clearly and honestly.', url: url }).catch(() => {
+      if (navigator.clipboard) navigator.clipboard.writeText(msg).then(() => showToast('Link copied ✓'));
+    });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(msg).then(() => showToast('Link copied — paste to share ✓'));
+  } else {
+    showToast('Copy the URL from your browser bar to share');
+  }
+}
+
+function shareWithFriend() {
+  saveCurrentFields();
+  const decision = state.situation.reframe || state.situation.desc || 'a decision';
+  const choice = state.finalChoice || '';
+  const commit = state.actionCommit || '';
+  const totals = {};
+  ['a','b','c'].forEach(alt => {
+    const pos = state.aspects[alt].pos.reduce((s,a) => s + (a.rating||0), 0);
+    const neg = state.aspects[alt].neg.reduce((s,a) => s + (a.rating||0), 0);
+    totals[alt] = pos + neg;
+  });
+  const ranked = ['a','b','c'].sort((x,y) => totals[y] - totals[x]);
+  let msg = `I just worked through a big decision using The C3hoice Lab.\n\nThe decision: ${decision}\n\nMy three options:\n`;
+  ranked.forEach((alt, i) => {
+    const name = state.alts[alt].name || `Option ${alt.toUpperCase()}`;
+    const score = (totals[alt] >= 0 ? '+' : '') + totals[alt];
+    msg += `  ${i+1}. ${name} (score: ${score})\n`;
+  });
+  if (choice) msg += `\nMy decision: ${choice}\n`;
+  if (commit) msg += `\nMy commitment: ${commit}\n`;
+  msg += `\nYou have done the work. Whatever follows, this decision was made with honesty and intention. Own it fully.\n`;
+  msg += `\nMay the choices you make be the wisest ones possible in the moments you meet them.\n— Steve, The Hopeful Humanist\nhopefulhumanistcafe.com`;
+  if (navigator.share) {
+    navigator.share({ title: 'My C3hoice Lab Results', text: msg }).catch(() => {
+      if (navigator.clipboard) navigator.clipboard.writeText(msg).then(() => showToast('Copied — paste to share ✓'));
+    });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(msg).then(() => showToast('Copied — paste to share ✓'));
+  } else {
+    showToast('Share not available on this browser');
+  }
+}
+
+function goBack() {
+  saveCurrentFields();
+  try { localStorage.setItem('decisionlab_state', JSON.stringify(state)); } catch(e) {}
+  const idx = SCREENS.indexOf(state.currentScreen);
+  if (idx > 0) showScreen(SCREENS[idx - 1], 'back');
+  else showScreen('home','back');
+}
+
+function saveCurrentFields() {
+  const s = state.currentScreen;
+  if (s === 'situation') {
+    state.situation.desc = document.getElementById('sit-desc').value;
+    state.situation.reframe = document.getElementById('sit-reframe').value;
+    state.situation.values = document.getElementById('sit-values').value;
+  }
+  if (s === 'alt-a-name') state.alts.a.name = document.getElementById('alt-a-name').value;
+  if (s === 'alt-b-name') state.alts.b.name = document.getElementById('alt-b-name').value;
+  if (s === 'alt-c-name') state.alts.c.name = document.getElementById('alt-c-name').value;
+  if (s === 'summary') {
+    state.congruenceNote = document.getElementById('congruence-note').value;
+    state.finalChoice = document.getElementById('final-choice').value;
+    state.actionCommit = document.getElementById('action-commit').value;
+  }
+}
+
+function startNew() { initAspects(); showScreen('situation'); }
+
+function startFresh() {
+  const s = state.currentScreen;
+  if (s === 'situation') {
+    document.getElementById('sit-desc').value = state.situation.desc || '';
+    document.getElementById('sit-reframe').value = state.situation.reframe || '';
+    document.getElementById('sit-values').value = state.situation.values || '';
+  }
+  ['a','b','c'].forEach(alt => {
+    const el = document.getElementById('alt-' + alt + '-name');
+    if (el) el.value = state.alts[alt].name || '';
+  });
+}
+
+function buildAspects(alt) {
+  const container = document.getElementById('aspects-' + alt + '-container');
+  container.innerHTML = '';
+  ['pos','neg'].forEach(type => {
+    for (let i = 0; i < 5; i++) {
+      const asp = state.aspects[alt][type][i];
+      const card = document.createElement('div');
+      card.className = 'aspect-card';
+      const isPos = type === 'pos';
+      const codeLabel = (isPos ? 'PRO' : 'CON') + '·' + alt.toUpperCase() + '·' + (i+1);
+      const headerClass = isPos ? 'pos' : 'neg';
+      const headerText = isPos ? `+ Pro ${i+1} — what speaks for this` : `− Con ${i+1} — what speaks against this`;
+      const ratings = isPos ? ['+1','+2','+3','+4','+5'] : ['−5','−4','−3','−2','−1'];
+      const vals = isPos ? [1,2,3,4,5] : [-5,-4,-3,-2,-1];
+      const pipClass = isPos ? 'pos-pip' : 'neg-pip';
+      const signalMsg = isPos
+        ? '⚡ Critical signal — this is a major reason to choose this option.'
+        : '⚡ Critical signal — this is a serious concern. Don\'t average it away.';
+      const codeExplain = (i === 0 && isPos)
+        ? `<div style="font-family:'Nunito',sans-serif;font-size:10px;font-style:italic;color:var(--muted);margin-bottom:10px;padding:8px 10px;background:var(--sand);border-radius:6px;">Each pro and con gets a short code — like PRO·A·1 — so you can refer back to it easily in your analysis.</div>`
+        : '';
+      let pipsHTML = ratings.map((r, ri) => {
+        const active = asp.rating === vals[ri] ? 'active' : '';
+        return `<div class="pip ${pipClass} ${active}" onclick="setRating('${alt}','${type}',${i},${vals[ri]},this,'${alt}-${type}-${i}-signal')">${r}</div>`;
+      }).join('');
+      card.innerHTML = `
+        ${codeExplain}
+        <div class="aspect-card-header ${headerClass}">
+          <span>${headerText}</span>
+          <span style="opacity:0.6;font-size:9px;">${codeLabel}</span>
+        </div>
+        <div class="aspect-card-body">
+          <div class="aspect-num">${codeLabel}</div>
+          <input class="aspect-text-input" type="text"
+            placeholder="${isPos ? 'What speaks for this option...' : 'What speaks against this option...'}"
+            value="${asp.text || ''}"
+            onchange="state.aspects['${alt}']['${type}'][${i}].text = this.value">
+          <div style="font-family:'Nunito',sans-serif;font-size:10px;font-weight:600;color:var(--muted);margin-bottom:6px;">
+            ${isPos ? 'How much does this matter? mild ← → critical' : 'How serious is this? critical ← → mild'}
+          </div>
+          <div class="rating-pips">${pipsHTML}</div>
+          <div class="signal-flash ${Math.abs(asp.rating) === 5 ? 'show' : ''}" id="${alt}-${type}-${i}-signal">${signalMsg}</div>
+        </div>`;
+      container.appendChild(card);
+    }
+  });
+}
+
+function setRating(alt, type, idx, val, btn, signalId) {
+  state.aspects[alt][type][idx].rating = val;
+  const pips = btn.closest('.rating-pips').querySelectorAll('.pip');
+  pips.forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const sf = document.getElementById(signalId);
+  if (sf) sf.classList.toggle('show', Math.abs(val) === 5);
+}
+
+function buildScores(alt) {
+  const posTotal = state.aspects[alt].pos.reduce((s,a) => s + (a.rating||0), 0);
+  const negTotal = state.aspects[alt].neg.reduce((s,a) => s + (a.rating||0), 0);
+  const total = posTotal + negTotal;
+  document.getElementById('score-' + alt + '-pos').textContent = '+' + posTotal;
+  document.getElementById('score-' + alt + '-neg').textContent = negTotal;
+  const totalEl = document.getElementById('total-' + alt + '-val');
+  totalEl.textContent = (total >= 0 ? '+' : '') + total;
+  totalEl.className = 'total-box-value ' + (total >= 0 ? 'pos' : 'neg');
+  const signalEl = document.getElementById('signals-' + alt);
+  signalEl.innerHTML = '';
+  const signals = [];
+  state.aspects[alt].pos.forEach((a,i) => {
+    if (a.rating === 5 && a.text) signals.push({ code:`PRO·${alt.toUpperCase()}·${i+1}`, text:a.text, val:'+5' });
+  });
+  state.aspects[alt].neg.forEach((a,i) => {
+    if (a.rating === -5 && a.text) signals.push({ code:`CON·${alt.toUpperCase()}·${i+1}`, text:a.text, val:'−5' });
+  });
+  if (signals.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'analysis-section';
+    wrap.innerHTML = `<div class="analysis-title">Critical Signals Found</div>
+      <div class="analysis-body">These are the pros or cons you rated ±5 — your strongest convictions.</div>
+      <div class="signal-list">${signals.map(s =>
+        `<div class="signal-item"><div class="signal-item-code">⚡ ${s.code} · ${s.val}</div><div class="signal-item-text">${s.text}</div></div>`
+      ).join('')}</div>`;
+    signalEl.appendChild(wrap);
+  }
+}
+
+function buildSummary() {
+  const totals = {};
+  ['a','b','c'].forEach(alt => {
+    const pos = state.aspects[alt].pos.reduce((s,a) => s + (a.rating||0), 0);
+    const neg = state.aspects[alt].neg.reduce((s,a) => s + (a.rating||0), 0);
+    totals[alt] = { pos, neg, total: pos + neg };
+  });
+
+  // Separate named and unnamed options
+  const named = ['a','b','c'].filter(alt => state.alts[alt].name.trim() !== '');
+  const unnamed = ['a','b','c'].filter(alt => state.alts[alt].name.trim() === '');
+
+  // Rank named options only
+  const ranked = named.sort((x,y) => totals[y].total - totals[x].total);
+  const colors = { a:'summary-card-a', b:'summary-card-b', c:'summary-card-c' };
+  const rankLabels = ['#1 Highest','#2 Middle','#3 Lowest'];
+  const container = document.getElementById('summary-cards');
+  container.innerHTML = '';
+
+  ranked.forEach((alt, i) => {
+    const name = state.alts[alt].name;
+    const t = totals[alt];
+    const scoreClass = t.total >= 0 ? 'score-pos-light' : 'score-neg-light';
+    const scoreText = (t.total >= 0 ? '+' : '') + t.total;
+    const posCount = state.aspects[alt].pos.filter(a => a.rating !== 0).length;
+    const negCount = state.aspects[alt].neg.filter(a => a.rating !== 0).length;
+    const signalCount = [...state.aspects[alt].pos, ...state.aspects[alt].neg].filter(a => Math.abs(a.rating) === 5).length;
+    const rankLabel = rankLabels[i] || `#${i+1}`;
+    container.innerHTML += `
+      <div class="summary-card ${colors[alt]}">
+        <div class="summary-card-header">
+          <div>
+            <div class="summary-card-name">${name}</div>
+            <div class="summary-card-rank">${rankLabel}</div>
+          </div>
+          <div class="summary-card-score ${scoreClass}">${scoreText}</div>
+        </div>
+        <div class="summary-card-body">
+          <div class="summary-row"><div class="summary-row-label">Positive Total</div><div class="summary-row-val val-pos">+${t.pos}</div></div>
+          <div class="summary-row"><div class="summary-row-label">Negative Total</div><div class="summary-row-val val-neg">${t.neg}</div></div>
+          <div class="summary-row"><div class="summary-row-label">Aspects mapped</div><div class="summary-row-val">${posCount} pos · ${negCount} neg</div></div>
+          <div class="summary-row"><div class="summary-row-label">Critical signals (±5)</div><div class="summary-row-val val-signal">${signalCount} ${signalCount > 0 ? '⚡' : ''}</div></div>
+        </div>
+      </div>`;
+  });
+
+  // Show unnamed options separately at the bottom
+  unnamed.forEach(alt => {
+    container.innerHTML += `
+      <div class="summary-card-unnamed">
+        <div class="summary-card-unnamed-icon">○</div>
+        <div class="summary-card-unnamed-text">Option ${alt.toUpperCase()} was not named — excluded from ranking. Go back to name it if you want it included.</div>
+      </div>`;
+  });
+  const allSignals = document.getElementById('all-signals');
+  allSignals.innerHTML = '';
+  let signalFound = false;
+  ['a','b','c'].forEach(alt => {
+    [...state.aspects[alt].pos.map((a,i) => ({...a, code:`PRO·${alt.toUpperCase()}·${i+1}`, val:'+5'})),
+     ...state.aspects[alt].neg.map((a,i) => ({...a, code:`CON·${alt.toUpperCase()}·${i+1}`, val:'−5'}))
+    ].forEach(a => {
+      if (Math.abs(a.rating) === 5 && a.text) {
+        signalFound = true;
+        allSignals.innerHTML += `<div class="signal-item"><div class="signal-item-code">⚡ ${a.code} · ${a.val}</div><div class="signal-item-text">${a.text}</div></div>`;
+      }
+    });
+  });
+  if (!signalFound) allSignals.innerHTML = '<div style="font-size:13px;font-style:italic;color:var(--muted);">No ±5 signals found. Consider whether you have been fully honest about what matters most.</div>';
+  const totalAspects = ['a','b','c'].reduce((sum,alt) =>
+    sum + [...state.aspects[alt].pos, ...state.aspects[alt].neg].filter(a => a.rating !== 0).length, 0);
+  const complexity = totalAspects <= 12 ? 'simpler, more straightforward' : totalAspects <= 20 ? 'moderately complex' : 'highly complex and multifaceted';
+  document.getElementById('complexity-text').textContent =
+    `You identified ${totalAspects} considerations across all three options. This is a ${complexity} decision. ${totalAspects >= 18 ? 'The number of considerations reflects real depth — this decision touches multiple areas of your life.' : 'If this feels incomplete, consider whether there are considerations you haven\'t yet named.'}`;
+  document.getElementById('congruence-note').value = state.congruenceNote || '';
+  document.getElementById('final-choice').value = state.finalChoice || '';
+  document.getElementById('action-commit').value = state.actionCommit || '';
+
+  // Surface guiding values in alignment check if entered
+  const valuesNote = document.getElementById('alignment-values-note');
+  if (state.situation.values && valuesNote) {
+    valuesNote.textContent = `Your guiding values for this decision: ${state.situation.values}. Let these anchor your answer below.`;
+    valuesNote.style.display = 'block';
+  } else if (valuesNote) {
+    valuesNote.style.display = 'none';
+  }
+}
+
+function setCongruence(val, el) {
+  state.congruence = val;
+  document.querySelectorAll('.con-seg').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveProgress() {
+  saveCurrentFields();
+  try {
+    localStorage.setItem('decisionlab_state', JSON.stringify(state));
+    showToast('Saved ✓');
+  } catch(e) { showToast('Could not save'); }
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem('decisionlab_state');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    Object.assign(state, parsed);
+    showScreen(state.currentScreen || 'situation');
+    startFresh();
+  } catch(e) { showToast('Could not load saved session'); }
+}
+
+function buildTextSummary() {
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const situation = state.situation.reframe || state.situation.desc || 'A decision';
+  const alignmentLabels = { pos: 'Feels aligned', mid: 'Not sure yet', neg: 'Doesn\'t feel right' };
+
+  let text = `C³HOICE LAB — MY DECISION RECORD\n`;
+  text += `${today}\n`;
+  text += `Steve, The Hopeful Humanist · The Choice Project\n`;
+  text += `C³ = C : C → C — Circumstance · Choice · Consequence\n\n`;
+  text += `${'─'.repeat(50)}\n\n`;
+  text += `THE SITUATION\n${state.situation.desc}\n`;
+  text += `Point of decision: ${state.situation.reframe}\n`;
+  if (state.situation.values) text += `Guiding values: ${state.situation.values}\n`;
+  text += `\n`;
+  text += `${'─'.repeat(50)}\n\n`;
+
+  ['a','b','c'].forEach(alt => {
+    const name = state.alts[alt].name;
+    if (!name) {
+      text += `OPTION ${alt.toUpperCase()}: Not named — skipped\n\n`;
+      return;
+    }
+    const pos = state.aspects[alt].pos.reduce((s,a) => s + (a.rating||0), 0);
+    const neg = state.aspects[alt].neg.reduce((s,a) => s + (a.rating||0), 0);
+    const total = pos + neg;
+    const hasConsiderations = state.aspects[alt].pos.some(a => a.text) || state.aspects[alt].neg.some(a => a.text);
+    text += `OPTION ${alt.toUpperCase()}: ${name}\n`;
+    text += `Score: +${pos} / ${neg} = ${total >= 0 ? '+' : ''}${total}\n`;
+    if (hasConsiderations) {
+      state.aspects[alt].pos.forEach((a,i) => { if (a.text) text += `  + PRO·${alt.toUpperCase()}·${i+1} [+${a.rating}]: ${a.text}\n`; });
+      state.aspects[alt].neg.forEach((a,i) => { if (a.text) text += `  - CON·${alt.toUpperCase()}·${i+1} [${a.rating}]: ${a.text}\n`; });
+    } else {
+      text += `  No considerations recorded.\n`;
+    }
+    text += '\n';
+  });
+
+  text += `${'─'.repeat(50)}\n\n`;
+  text += `ALIGNMENT CHECK: ${alignmentLabels[state.congruence] || state.congruence}\n`;
+  if (state.congruenceNote) text += `${state.congruenceNote}\n`;
+  text += `\nMY DECISION:\n${state.finalChoice || 'Not yet recorded.'}\n`;
+  text += `\nACTION COMMITMENT:\n${state.actionCommit || 'Not yet recorded.'}\n`;
+  text += `\n${'─'.repeat(50)}\n`;
+  text += `\nConsider sharing this with someone you trust. A decision spoken aloud\nto an honest friend often becomes clearer — or reveals something\nyou had not yet seen.\n`;
+  text += `\nYou have done the work. Whatever follows, this decision was made\nwith honesty and intention. Own it fully.\n`;
+  text += `\nIf The C³hoice Lab has been useful and you would like to support\nits continued development — a coffee is always welcome:\nbuymeacoffee.com/thehopefulhumanistcafe\n`;
+  text += `\nMay the choices you make be the wisest ones possible\nin the moments you meet them.\n\n`;
+  text += `— Steve, The Hopeful Humanist\nhopefulhumanistcafe.com`;
+  return text;
+}
+
+function copyResults() {
+  saveCurrentFields();
+  const text = buildTextSummary();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓'));
+  } else { showToast('Copy not supported on this device'); }
+}
+
+function shareResults() {
+  saveCurrentFields();
+  const text = buildTextSummary();
+  if (navigator.share) {
+    navigator.share({ title: 'My C3hoice Lab Results', text: text }).catch(() => {
+      copyResults();
+    });
+  } else { copyResults(); }
+}
+
+function emailResults() {
+  saveCurrentFields();
+  const text = buildTextSummary();
+  const today = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const subject = encodeURIComponent(`C³hoice Lab — ${(state.situation.reframe || state.situation.desc || 'My Decision').substring(0, 40)} · ${today}`);
+  const body = encodeURIComponent(text);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  showToast('Opening your mail app...');
+}
+
+// ── VOICE SYSTEM ──────────────────────────────
+const VOICE_PROMPTS = {
+  'home': `Welcome to the C3hoice Lab. This tool was built on a simple but powerful idea — that you are a choosing, deciding, seeking person. Not a passenger in your own life. A chooser. When you are ready, tap Start a New Decision, and let's begin.`,
+  'situation': `The first step is simply to name what you are facing. Not the polished version you would tell someone else. The raw one. Whatever it is — write it down as it actually is. Then reframe it. Take what you just wrote and turn it into a point of decision. Not a problem happening to you. A fork in the road that you are standing at. That reframe is the Dawning of Agency. The problem hasn't changed. But your relationship to it just did.`,
+  'alt-a-name': `Now name your options — the real roads available to you. Not wishes. Actual paths you could take. Your first option. Think of this as Road A. Name it clearly and describe it in a sentence or two.`,
+  'alt-b-name': `Good. Now Option B. This should be genuinely different from Option A — a real second road, not just a minor variation. What is your second real option?`,
+  'alt-c-name': `And now the third. Often our most honest option is the one we've been quietly avoiding naming. The option that feels too risky to say out loud, or too unconventional. Name it. What is yours?`,
+  'aspects-a': `Now the real work begins. For Option A, map what actually influences you — both the pros and the cons. Be honest, especially about the uncomfortable ones. Rate each from one to five. A five means this matters deeply. Rate honestly.`,
+  'aspects-b': `Option B gets the same treatment. Write the pros and cons that genuinely influence you. The lab only works if you give all three options equal honesty. What are you being honest about here?`,
+  'aspects-c': `Last one. Option C. Same process, same honesty. Trust what you find. What surprises you about this option when you actually sit with it?`,
+  'scores-a': `Here are the numbers for Option A. But remember — numbers are only the first lens. Did any consideration earn a plus five or minus five? Those are your critical signals. They speak louder than the averages. What do you see?`,
+  'scores-b': `Option B's score is in front of you now. Look beyond the total. If there's a minus five here, ask yourself — is that a fundamental problem with this option, or a concern you could address? That kind of signal matters more than all the moderate ratings combined.`,
+  'scores-c': `And here is Option C. Three sets of numbers now. You're starting to see the map of your own thinking. The alignment check on the summary screen is where you test whether the numbers match your needs, your beliefs, your values, your interests, your intentions, and your strengths.`,
+  'summary': `You've done the work. Here is your decision map. Now comes the most important part. Not the numbers. The alignment check. Which of these options aligns most honestly with your needs, your beliefs, your values, your interests, your intentions, and your strengths? That may or may not be the highest scorer. Which life feels like yours? Take your time. Write it down. And when you're ready — choose. And own it fully.`
+};
+
+const VOICE_FILES = {
+  'home':       'audio/voice-home.m4a',
+  'situation':  'audio/voice-situation.m4a',
+  'alt-a-name': 'audio/voice-alt-a.m4a',
+  'alt-b-name': 'audio/voice-alt-b.m4a',
+  'alt-c-name': 'audio/voice-alt-c.m4a',
+  'aspects-a':  'audio/voice-aspects-a.m4a',
+  'aspects-b':  'audio/voice-aspects-b.m4a',
+  'aspects-c':  'audio/voice-aspects-c.m4a',
+  'scores-a':   'audio/voice-scores-a.m4a',
+  'scores-b':   'audio/voice-scores-b.m4a',
+  'scores-c':   'audio/voice-scores-c.m4a',
+  'summary':    'audio/voice-scores-c.m4a'
+};
+
+let currentAudio = null;
+let isSpeaking = false;
+
+function speakCurrentScreen() {
+  const screen = state.currentScreen;
+  const file = VOICE_FILES[screen];
+  if (isSpeaking) { stopSpeaking(); return; }
+  if (!file) return;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+  currentAudio = new Audio(file);
+
+  currentAudio.play().then(() => {
+    isSpeaking = true;
+    const btn = document.getElementById('voiceBtn');
+    if (btn) { btn.textContent = '⏹'; btn.classList.add('speaking'); }
+  }).catch(() => {
+    currentAudio = null;
+    isSpeaking = false;
+  });
+
+  currentAudio.onended = () => resetVoiceUI();
+  currentAudio.onerror = () => { currentAudio = null; resetVoiceUI(); };
+}
+
+function stopSpeaking() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  isSpeaking = false;
+  resetVoiceUI();
+}
+
+function resetVoiceUI() {
+  isSpeaking = false;
+  const btn = document.getElementById('voiceBtn');
+  if (btn) { btn.textContent = '🔊'; btn.classList.remove('speaking'); }
+}
+
+// ── PWA INSTALL ──────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (state.currentScreen === 'home' && deferredPrompt) showInstallBanner();
+  }, 8000);
+});
+
+function showInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    const banner = document.getElementById('installBanner');
+    if (banner) banner.style.display = 'none';
+  });
+}
+
+function dismissInstall() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const swCode = `
+      const CACHE = 'c3hoice-lab-v1';
+      const ASSETS = ['.'];
+      self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
+      self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+      self.addEventListener('fetch', e => { e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('.')))); });
+    `;
+    try {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(() => {});
+    } catch(e) {}
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+const INFO_CARDS = ['options','considerations','levels','rating'];
+function toggleInfo(key) {
+  const expand = document.getElementById('expand-' + key);
+  const card = document.getElementById('card-' + key);
+  const isOpen = expand.classList.contains('show');
+  INFO_CARDS.forEach(k => {
+    document.getElementById('expand-' + k).classList.remove('show');
+    document.getElementById('card-' + k).classList.remove('open');
+  });
+  if (!isOpen) {
+    expand.classList.add('show');
+    card.classList.add('open');
+    setTimeout(() => { expand.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 50);
+  }
+}
+
+// ── DAILY PROMPTS ──────────────────────────────
+const DAILY_CYCLE = [
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'What are you choosing by not choosing today?' },
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'What assumptions are shaping your options without your permission?' },
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'What part of your life is running on autopilot instead of intention?' },
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'What are you avoiding by staying undecided?' },
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'Which of your current choices is driven by habit rather than desire?' },
+  { arc:'Arc 1 — Awareness', arcSub:'Seeing your choices clearly.', q:'What truth about your situation have you been postponing?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'What would you choose if you stripped away every expectation but your own?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'Which option aligns with your values rather than your impulses?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'What decision would you make if you trusted your perception fully?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'What outcome are you secretly hoping for but haven\'t admitted?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'Which path feels honest, even if it\'s inconvenient?' },
+  { arc:'Arc 2 — Clarity', arcSub:'Understanding what matters.', q:'What would you choose if you weren\'t trying to manage anyone else\'s reaction?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'What would you choose if fear had no vote?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'Which option requires you to grow rather than shrink?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'What decision have you been putting off that is actually already within your reach?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'What is the smallest courageous step available to you today?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'Which choice reflects who you want to become, not who you\'ve been?' },
+  { arc:'Arc 3 — Courage', arcSub:'Choosing despite uncertainty.', q:'What would you choose if you assumed things could go well?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'Which option feels like integrity rather than comfort?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'What decision today brings you closer to the life you would respect?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'What would you choose if you weren\'t trying to be understood?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'Which path feels alive rather than familiar?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'What decision honors your long-term self over your short-term self?' },
+  { arc:'Arc 4 — Alignment', arcSub:'Matching choices to identity.', q:'What would you choose if you stopped letting past choices define what future choices are available to you?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'What is the simplest next step — not the perfect one?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'What decision today would make tomorrow lighter?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'What are you saying "yes" to every time you say "not yet"?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'Which option moves you forward even one inch?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'What decision would you make if you stopped waiting for the right moment?' },
+  { arc:'Arc 5 — Action', arcSub:'Turning intention into movement.', q:'What is the decision beneath the distraction?' },
+  { arc:'Arc 6 — Integration', arcSub:'Living your choices.', q:'Sartre argued that existence precedes essence — that you are defined by what you do, not what you intend. Which choice today reflects who you are becoming?' },
+  { arc:'Arc 6 — Integration', arcSub:'Living your choices.', q:'Maslow observed that most people sell themselves short — they choose the smaller life when a larger one is available. What choice today reflects the fuller version of who you are?' },
+  { arc:'Arc 6 — Integration', arcSub:'Living your choices.', q:'Camus: In an uncertain world, what choice gives your day meaning?' },
+  { arc:'Arc 6 — Integration', arcSub:'Living your choices.', q:'William James believed that truth is found in what works — what holds up in lived experience. What decision, made today, would prove itself true?' },
+  { arc:'Arc 6 — Integration', arcSub:'Living your choices.', q:'May the choices you make today be the wisest ones possible in the moments you meet them.' },
+];
+
+const ARC_QUOTES = {
+  'Arc 1 — Awareness': { quote:'It happens that the stage-sets collapse. Rising, tram, four hours in the office or factory, meal, tram, four hours of work, meal, sleep and Monday, Tuesday, Wednesday, Thursday, Friday and Saturday, according to the same rhythm — this path is easily followed most of the time. But one day the "why" arises and everything begins in that weariness tinged with amazement.', attr:'— Albert Camus, The Myth of Sisyphus, p. 19' },
+  'Arc 2 — Clarity': { quote:'A wealth of information creates a poverty of attention.', attr:'— Herbert Simon' },
+  'Arc 3 — Courage': { quote:'At any street corner the feeling of absurdity can strike any man in the face.', attr:'— Albert Camus, The Myth of Sisyphus, p. 17' },
+  'Arc 4 — Alignment': { quote:'We are thus immediately thrust into a world that we may call "intersubjectivity." It is in this world that man decides what he is and what others are.', attr:'— Jean-Paul Sartre, Existentialism is a Humanism, p. 42' },
+  'Arc 5 — Action': { quote:'Choosing wisely begins with developing a clear understanding of your goals. And the first choice you must make is between the goal of choosing the absolute best and the goal of choosing something that is good enough.', attr:'— Barry Schwartz, The Paradox of Choice, Ch. 4, p. 77' },
+  'Arc 6 — Integration': { quote:'To say, "Do not decide, but leave the question open," is itself a passional decision — just like deciding yes or no — and is attended with the same risk of losing the truth.', attr:'— William James, The Will to Believe, 1896' }
+};
+
+function isFirstDayOfArc(idx) {
+  if (idx === 0) return true;
+  return DAILY_CYCLE[idx].arc !== DAILY_CYCLE[idx-1].arc;
+}
+
+function initDailyPrompt() {
+  try {
+    const today = new Date();
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+    const idx = dayOfYear % DAILY_CYCLE.length;
+    const entry = DAILY_CYCLE[idx];
+    const dayInCycle = (idx % 35) + 1;
+    const qEl = document.getElementById('dailyQuestion');
+    const dEl = document.getElementById('dailyDate');
+    const tagEl = document.getElementById('dailyArcTag');
+    const subEl = document.getElementById('dailyArcSub');
+    const quoteEl = document.getElementById('dailyArcQuote');
+    if (qEl) qEl.textContent = entry.q;
+    if (dEl) dEl.textContent = today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    if (tagEl) tagEl.textContent = entry.arc + ' · Day ' + dayInCycle;
+    if (subEl) subEl.textContent = entry.arcSub;
+    if (quoteEl) {
+      const arcQuote = ARC_QUOTES[entry.arc];
+      if (arcQuote && isFirstDayOfArc(idx)) {
+        quoteEl.innerHTML = '"' + arcQuote.quote + '"<span class="daily-card-arc-quote-attr">' + arcQuote.attr + '</span>';
+        quoteEl.style.display = 'block';
+      } else {
+        quoteEl.style.display = 'none';
+      }
+    }
+    if (idx >= 30 && qEl) qEl.style.fontStyle = 'italic';
+    else if (qEl) qEl.style.fontStyle = 'normal';
+  } catch(e) {}
+}
+
+const emailBtnStyle = document.createElement('style');
+emailBtnStyle.textContent = '.share-btn-email .share-btn-label { color: #fff; }';
+document.head.appendChild(emailBtnStyle);
+
+window.addEventListener('load', () => {
+  initDailyPrompt();
+  try {
+    const saved = localStorage.getItem('decisionlab_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const btn = document.getElementById('continueBtn');
+      btn.style.display = 'flex';
+      const sub = document.getElementById('continueSub');
+      sub.textContent = parsed.situation?.desc
+        ? `"${parsed.situation.desc.substring(0, 50)}..."`
+        : 'Resume your saved decision';
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
