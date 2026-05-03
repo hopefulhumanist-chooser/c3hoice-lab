@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A visual map of the complete C³ philosophy — Circumstance, Choice, Consequence. From the Field of Influence through the Dawning of Agency, Knowing Your Self, and the Ripple. Free from Steve, The Hopeful Humanist.">
+<title>The C³ Philosophy Flowchart — Steve, The Hopeful Humanist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Nunito:wght@300;400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #fdf6ec;
+    --warm-white: #fefaf4;
+    --terracotta: #c4603a;
+    --amber: #d4891a;
+    --amber-light: #f0b84a;
+    --forest: #3d5a3e;
+    --navy: #2c3e5a;
+    --sand: #e8d5b0;
+    --sand-dark: #c8b48a;
+    --ink: #2a1f14;
+    --muted: #7a6a58;
+    --pos: #3d7a3e;
+    --pos-bg: #edf7ee;
+    --neg: #9b3a22;
+    --neg-bg: #fdf0ec;
+  }
+
+  body {
+    background-color: var(--cream);
+    font-family: 'Lora', serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 50px 24px 70px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── CANVAS TEXTURE BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 28px,
+        rgba(180,150,100,0.055) 28px,
+        rgba(180,150,100,0.055) 29px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 28px,
+        rgba(180,150,100,0.055) 28px,
+        rgba(180,150,100,0.055) 29px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* canvas linen grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.045'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* warm radial light */
+  .canvas-light {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(212,137,26,0.11) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(196,96,58,0.09) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, rgba(253,246,236,0.4) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 740px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: riseUp 0.6s ease both;
+  }
+
+  .header-tag {
+    display: inline-block;
+    background: var(--terracotta);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .header h1 em { font-style: italic; color: var(--terracotta); }
+
+  .header-purpose {
+    font-size: 13.5px;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .header-formula-banner {
+    display: inline-block;
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 14px 32px;
+    text-align: center;
+  }
+  .formula-main {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 4vw, 34px);
+    font-weight: 700;
+    color: var(--amber-light);
+    letter-spacing: 4px;
+    line-height: 1.1;
+  }
+  .formula-sub {
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .header-divider {
+    display: flex; align-items: center; gap: 12px; margin-top: 22px;
+  }
+  .header-divider::before, .header-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sand-dark));
+  }
+  .header-divider::after { background: linear-gradient(90deg, var(--sand-dark), transparent); }
+  .header-divider span { font-size: 16px; color: var(--amber); }
+
+  /* ── CARDS ── */
+  .card {
+    border-radius: 16px;
+    padding: 24px 26px;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    animation: riseUp 0.5s ease both;
+    animation-delay: calc(var(--i, 0) * 0.07s);
+  }
+  .card:hover { transform: translateY(-3px); }
+
+  .card-eyebrow {
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-eyebrow::after { content: ''; flex: 1; height: 1px; opacity: 0.25; background: currentColor; }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3.5vw, 27px);
+    font-weight: 700; line-height: 1.2; margin-bottom: 10px;
+  }
+
+  .card-body { font-size: 13.5px; line-height: 1.78; font-weight: 400; }
+
+  /* Card themes */
+  .card-field { background: var(--navy); color: #fff; box-shadow: 0 8px 32px rgba(44,62,90,0.25); }
+  .card-field .card-eyebrow { color: var(--amber-light); }
+  .card-field .card-title { color: #fff; }
+  .card-field .card-body { color: rgba(255,255,255,0.82); }
+
+  .card-circumstance { background: var(--warm-white); border: 2px solid var(--sand); box-shadow: 0 4px 20px rgba(196,96,58,0.1); }
+  .card-circumstance .card-eyebrow { color: var(--terracotta); }
+  .card-circumstance .card-title { color: var(--terracotta); }
+  .card-circumstance .card-body { color: var(--muted); }
+
+  .card-truth { background: linear-gradient(135deg, #f8f2e6 0%, #f0e8d4 100%); border: 2px dashed var(--sand-dark); box-shadow: 0 4px 20px rgba(212,137,26,0.08); }
+  .card-truth .card-eyebrow { color: var(--amber); }
+  .card-truth .card-title { color: var(--navy); }
+  .card-truth .card-body { color: var(--muted); }
+
+  .card-choice { background: var(--terracotta); color: #fff; box-shadow: 0 8px 32px rgba(196,96,58,0.35); }
+  .card-choice .card-eyebrow { color: rgba(255,255,255,0.75); }
+  .card-choice .card-title { color: #fff; }
+  .card-choice .card-body { color: rgba(255,255,255,0.88); }
+
+  .card-consequences { background: var(--forest); color: #fff; box-shadow: 0 8px 32px rgba(61,90,62,0.3); }
+  .card-consequences .card-eyebrow { color: rgba(255,255,255,0.65); }
+  .card-consequences .card-title { color: #fff; }
+  .card-consequences .card-body { color: rgba(255,255,255,0.85); }
+
+  .card-ripple { background: var(--warm-white); border: 2px solid var(--sand); box-shadow: 0 4px 20px rgba(61,90,62,0.08); }
+  .card-ripple .card-eyebrow { color: var(--forest); }
+  .card-ripple .card-title { color: var(--forest); }
+  .card-ripple .card-body { color: var(--muted); }
+
+  .card-counsel { background: linear-gradient(135deg, var(--amber) 0%, #b8731a 100%); color: #fff; box-shadow: 0 8px 32px rgba(212,137,26,0.4); }
+  .card-counsel .card-eyebrow { color: rgba(255,255,255,0.75); }
+  .card-counsel .card-title { color: #fff; }
+  .card-counsel .card-body { color: rgba(255,255,255,0.9); }
+
+  /* ── +/− BADGES ── */
+  .dual-badges { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+  .badge {
+    display: flex; align-items: flex-start; gap: 7px;
+    border-radius: 10px; padding: 8px 12px;
+    font-family: 'Nunito', sans-serif; font-size: 11.5px; font-weight: 600;
+    flex: 1; min-width: 140px; line-height: 1.45;
+  }
+  .badge-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0; line-height: 1; margin-top: 1px;
+  }
+  .badge-pos-light { background: var(--pos-bg); color: var(--pos); }
+  .badge-pos-light .badge-icon { background: var(--pos); color: #fff; }
+  .badge-neg-light { background: var(--neg-bg); color: var(--neg); }
+  .badge-neg-light .badge-icon { background: var(--neg); color: #fff; }
+  .badge-pos-dark { background: rgba(255,255,255,0.15); color: #a8f0aa; border: 1px solid rgba(168,240,170,0.3); }
+  .badge-pos-dark .badge-icon { background: rgba(168,240,170,0.3); color: #a8f0aa; }
+  .badge-neg-dark { background: rgba(255,255,255,0.1); color: #f0b8a8; border: 1px solid rgba(240,184,168,0.3); }
+  .badge-neg-dark .badge-icon { background: rgba(240,184,168,0.25); color: #f0b8a8; }
+
+  /* ── CHOICE SPECTRUM ── */
+  .spectrum-item:last-child { border-right: none; }
+
+  /* ── FORMULA BLOCK ── */
+  .formula-block {
+    margin-top: 16px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+  }
+  .formula-block-main {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 4vw, 30px);
+    font-weight: 700; color: var(--amber-light);
+    letter-spacing: 5px; line-height: 1.1;
+  }
+  .formula-block-sub {
+    font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.55); letter-spacing: 2px;
+    text-transform: uppercase; margin-top: 6px;
+  }
+  .formula-block-meaning {
+    font-style: italic; font-size: 12.5px;
+    color: rgba(255,255,255,0.78); margin-top: 10px; line-height: 1.55;
+    border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px;
+  }
+
+  /* ── CONSEQUENCE NOTE ── */
+  .consequence-note {
+    margin-top: 14px;
+    background: rgba(255,255,255,0.1);
+    border-left: 3px solid var(--amber-light);
+    border-radius: 0 10px 10px 0;
+    padding: 11px 14px;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+  }
+
+  /* ── TRUTH STREAMS ── */
+  .truth-streams {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;
+  }
+  .truth-stream {
+    background: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 12px;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .truth-stream-icon { font-size: 16px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+  .truth-stream-text { font-size: 12px; line-height: 1.45; color: var(--navy); font-style: italic; }
+
+  /* ── PILLS ── */
+  .pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+  .pill {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px; padding: 4px 13px;
+    font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600; color: #fff;
+  }
+
+  /* ── RIPPLE VISUAL ── */
+  .ripple-visual {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin-top: 18px; flex-wrap: wrap;
+  }
+  .ripple-orb { text-align: center; font-size: 12px; font-style: italic; color: var(--muted); }
+  .ripple-orb-inner {
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 2px solid var(--sand-dark);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 6px; font-size: 20px; background: var(--warm-white);
+  }
+  .ripple-center-orb { text-align: center; }
+  .ripple-center-orb-inner {
+    width: 76px; height: 76px; border-radius: 50%; background: var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 6px; font-size: 26px;
+    box-shadow: 0 0 0 8px rgba(61,90,62,0.12), 0 0 0 16px rgba(61,90,62,0.06);
+  }
+  .ripple-center-orb-label {
+    font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+    color: var(--forest); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .ripple-arrow { font-size: 20px; color: var(--sand-dark); flex-shrink: 0; }
+
+  /* ── CONTEXT OVERLAP NOTE ── */
+  .overlap-note {
+    background: rgba(212,137,26,0.08);
+    border: 1.5px dashed var(--sand-dark);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.55;
+    text-align: center;
+  }
+
+  /* ── CONNECTOR ── */
+  .connector {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 4px 0; animation: riseUp 0.4s ease both;
+  }
+  .connector-stem {
+    width: 2px; height: 16px;
+    background: linear-gradient(180deg, var(--sand-dark), var(--amber-light));
+    border-radius: 2px;
+  }
+  .connector-badge {
+    background: var(--cream); border: 1.5px solid var(--sand-dark);
+    border-radius: 20px; padding: 4px 14px;
+    font-family: 'Nunito', sans-serif; font-size: 9.5px; font-weight: 700;
+    letter-spacing: 1.5px; color: var(--muted);
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .connector-stem-bottom {
+    width: 2px; height: 16px;
+    background: linear-gradient(180deg, var(--amber-light), var(--sand-dark));
+    border-radius: 2px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 44px; background: var(--warm-white);
+    border-radius: 16px; border: 2px solid var(--sand);
+    padding: 26px 30px; text-align: center;
+  }
+  .footer-label {
+    font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase; color: var(--amber); margin-bottom: 12px;
+  }
+  .footer blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(14px, 2.5vw, 18px); font-style: italic;
+    color: var(--navy); line-height: 1.7; max-width: 500px; margin: 0 auto 14px;
+  }
+  .footer-thinkers { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+  .thinker {
+    font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600;
+    color: var(--muted); display: flex; align-items: center; gap: 6px;
+  }
+  .thinker::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--terracotta); flex-shrink: 0;
+  }
+
+  /* ── ANIMATION ── */
+  @keyframes riseUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 560px) {
+    .truth-streams { grid-template-columns: 1fr; }
+    .ripple-visual { flex-direction: column; gap: 6px; }
+    .dual-badges { flex-direction: column; }
+    .badge { min-width: unset; }
+    .spectrum-item:last-child { border-bottom: none; }
+  }
+/* ── CHOOSER CARD ── */
+.card-chooser {
+  background: linear-gradient(135deg, var(--navy), #1e2d42);
+  border: 2px solid var(--amber);
+}
+
+.card-chooser .card-eyebrow { color: var(--amber); }
+.card-chooser .card-title { color: #fff; }
+.card-chooser .card-body { color: rgba(255,255,255,0.85); }
+
+.chooser-formal {
+  font-size: 12.5px; font-style: italic;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.7; margin: 14px 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--amber);
+  background: rgba(255,255,255,0.06);
+  border-radius: 0 8px 8px 0;
+}
+
+.chooser-list {
+  margin: 12px 0;
+}
+
+.chooser-item {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.7; padding: 2px 0;
+}
+
+.chooser-bullet {
+  color: var(--terra);
+  font-weight: 700; margin-right: 6px;
+}
+
+.chooser-close {
+  font-size: 12.5px; font-style: italic;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7; margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+/* ── SHOULDERS WE STAND ON ── */
+.shoulders-section {
+  background: var(--navy);
+  border-radius: 20px;
+  padding: 36px 28px 32px;
+  margin: 32px 0 16px;
+}
+
+.shoulders-eyebrow {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--amber); text-align: center;
+  margin-bottom: 6px;
+}
+
+.shoulders-sub {
+  font-size: 13px; font-style: italic;
+  color: rgba(255,255,255,0.45);
+  text-align: center; margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.shoulders-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (min-width: 600px) {
+  .shoulders-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.shoulder-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.shoulder-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--amber); margin-bottom: 3px;
+}
+
+.shoulder-idea {
+  font-size: 13px; font-weight: 600;
+  color: #fff; margin-bottom: 10px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+.shoulder-quote {
+  font-size: 12px; font-style: italic;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6; margin-bottom: 6px;
+  border-left: 2px solid var(--terra);
+  padding-left: 10px;
+}
+
+.shoulder-source {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 8px; line-height: 1.5;
+}
+
+.shoulder-link {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 8px;
+}
+
+.shoulders-signoff {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px; font-style: italic;
+  color: rgba(255,255,255,0.6);
+  text-align: center; line-height: 1.7;
+}
+
+.shoulders-author {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  margin-top: 8px; letter-spacing: 1px;
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  .card { page-break-inside: avoid; break-inside: avoid; }
+  .connector { page-break-inside: avoid; break-inside: avoid; }
+  .dual-badges { page-break-inside: avoid; break-inside: avoid; }
+  .formula-block { page-break-inside: avoid; break-inside: avoid; }
+  .screen-only-note { display: none; }
+  body { background: #fff; }
+  .page { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="screen-only-note" style="background:#fdf6ec;border-bottom:1px solid #e8d5b0;padding:10px 20px;text-align:center;font-family:'Nunito',sans-serif;font-size:11px;font-weight:600;color:#7a6a58;line-height:1.6;">
+  This flowchart is designed for screen. For a printable version of the C³ framework, use the <strong style="color:#c4603a;">C³hoice Workbook</strong> — available at <strong style="color:#c4603a;">hopefulhumanist-chooser.github.io/c3hoice-lab</strong>
+</div>
+<div style="background:#fdf6ec;border-bottom:1px solid #e8d5b0;padding:8px 20px;text-align:center;font-family:'Nunito',sans-serif;font-size:11px;font-weight:600;color:#7a6a58;line-height:1.6;">This flowchart is an offering — not a prescription. Some terms, like the <em>Dawning of Agency</em> or <em>Knowing Your Self</em>, are explained as you scroll. Question what does not fit. If a term is unfamiliar, keep reading.</div>
+<div class="canvas-light"></div>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">Empowerment in an Absurd World</div>
+    <h1>You Were Thrown Here.<br><em>Thrust into an absurd world.</em><br><em>The canvas is yours.</em></h1>
+    <p class="header-purpose" style="font-size:13.5px;font-style:italic;color:var(--muted);line-height:1.6;margin-bottom:18px;">
+      An offering for empowerment, meaning, and connection.
+      To make meaning. To own your choices. To connect with others — in a loving and caring way.
+    </p>
+    <div class="header-formula-banner">
+      <div class="formula-main">C³ = C : C → C</div>
+      <div class="formula-sub">Circumstance &nbsp;·&nbsp; Choice &nbsp;·&nbsp; Consequence</div>
+    </div>
+    <div class="header-divider"><span>✦</span></div>
+  </div>
+
+  <!-- 0. CHOICE HISTORY ENTRY POINT -->
+  <div class="card card-truth" style="--i:0; margin-bottom:0;">
+    <div class="card-eyebrow">Before the Framework — A Starting Point</div>
+    <div class="card-title">Have You Met Your Choices Yet?</div>
+    <div class="card-body">
+      Not everyone arrives at the moment of recognising their own freedom through a single dramatic moment. Some people need to look back first — to see the pattern of choices already made before they can own the ones ahead. If you have not yet experienced a clear moment of awakening to your own agency, begin with your Choice History. Map how you have spent your time and money. Chronicle the significant choices of the last five years. Name the choice precedents that have been forming without your awareness. That mapping is not a detour — it is the path. The framework below will make far more sense once you have seen the evidence that you have always been choosing.
+    </div>
+    <div class="dual-badges">
+      <div class="badge badge-pos-light">
+        <div class="badge-icon">+</div>
+        How you actually spend time and money reveals your values more honestly than anything you would say if asked directly
+      </div>
+      <div class="badge badge-neg-light">
+        <div class="badge-icon">−</div>
+        Choices made without self-awareness become precedents — patterns that quietly narrow what feels possible next
+      </div>
+    </div>
+    <div class="overlap-note" style="margin-top:14px;">
+      Every choice is a self-portrait. You do not need to have named your values to have been living by them. Look at where your time and money have actually gone — that is the most honest mirror available.
+    </div>
+  </div>
+
+  <div class="connector" style="--i:0b">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">once you see your history, enter the framework through</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- THE CHOOSER -->
+  <div class="card card-chooser" style="--i:0">
+    <div class="card-eyebrow">The Subject of This Entire Framework</div>
+    <div class="card-title">The Chooser</div>
+    <div class="card-body">
+      A chooser is not simply someone who picks from a menu. A chooser is the active centre of a life — shaped by limits you did not choose, pressures you did not invite, and a freedom you cannot escape.
+    </div>
+    <div class="chooser-formal">
+      The chooser is the individual who, in each moment, must act within limits, interpret abundance, commit without certainty, assume responsibility, confront the absurd, move between safety and growth, and live deliberately according to conscience.
+    </div>
+    <div class="chooser-list">
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Bounded by cognitive and informational limits</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Burdened by excessive options</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Empowered by will and commitment</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Responsible for self-authorship</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Challenged by an indifferent world</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Motivated by needs and potential</div>
+      <div class="chooser-item"><span class="chooser-bullet">·</span> Guided by conscience and simplicity</div>
+    </div>
+    <div class="chooser-close">
+      Thus: the chooser is the evolving self who must continually decide who to become, what to value, and how to act — despite uncertainty, pressure, and constraint. And the choices that matter most are not the ones made alone — they are the ones made in the direction of others.
+    </div>
+  </div>
+
+  <div class="connector" style="--i:0">
+    <div class="connector-label">gives rise to</div>
+    <div class="connector-stem"></div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 1. FIELD OF INFLUENCE -->
+  <div class="card card-field" style="--i:1">
+    <div class="card-eyebrow">The Soil — Where Everything Begins</div>
+    <div class="card-title">The Field of Influence</div>
+    <div class="card-body">
+      The Field of Influence is third-person and expansive. It exists whether anyone is looking at it or not — the larger web of cultural, relational, historical, and environmental forces that determines what circumstances are even possible for anyone standing in it. You did not choose your family, your culture, or the moment in history you arrived into. These are the situation cards already on the table before you drew your first breath.
+    </div>
+    <div class="overlap-note">
+      The Field is not something you experience directly — it is the larger reality that determines what experiences are even possible for you. Circumstance is how the Field arrives in your life. The Field of Influence is the connective tissue between individual agency and collective reality.
+    </div>
+    <div class="dual-badges">
+      <div class="badge badge-pos-dark">
+        <div class="badge-icon">+</div>
+        Your field can be intentionally cultivated — every choice you make ripples back into it
+      </div>
+      <div class="badge badge-neg-dark">
+        <div class="badge-icon">−</div>
+        A neglected field quietly narrows what circumstances are possible for those around you
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:2">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">shapes what is possible, arriving as</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 2. CIRCUMSTANCE -->
+  <div class="card card-circumstance" style="--i:3">
+    <div class="card-eyebrow">C¹ — Circumstance</div>
+    <div class="card-title">Circumstance</div>
+    <div class="card-body">
+      Circumstance is first-person and situated. It is the world as experienced by a particular consciousness — the specific conditions, pressures, possibilities, and constraints that you face at the moment of choice. It is inherently subjective and local. Two people standing in the same room can have entirely different circumstances, because circumstance is not observed — it is lived. Your circumstances define the real array of options on your canvas right now.
+    </div>
+    <div class="dual-badges">
+      <div class="badge badge-pos-light">
+        <div class="badge-icon">+</div>
+        Honest awareness of your circumstances reveals real options you might otherwise miss
+      </div>
+      <div class="badge badge-neg-light">
+        <div class="badge-icon">−</div>
+        Ignoring circumstance means choosing blind — inside a fog of your own assumptions
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:4">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">calls you to find</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 3. TRUTH & CONVERGENCE -->
+  <div class="card card-truth" style="--i:5">
+    <div class="card-eyebrow">The Compass</div>
+    <div class="card-title">Truth & Convergence</div>
+    <div class="card-body">
+      Nobody holds a monopoly on truth — not even you. But you can point toward it. These are the tendencies of truth — the conditions under which belief tends to be warranted. Seek convergence, not certainty.
+    </div>
+    <div class="truth-streams">
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🤍</div>
+        <div class="truth-stream-text">One tends to believe that which feels to be true</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🔗</div>
+        <div class="truth-stream-text">One tends to believe that which has convergence</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🔧</div>
+        <div class="truth-stream-text">One tends to believe that which has pragmatic utility</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">👁️</div>
+        <div class="truth-stream-text">One tends to believe that which opens itself up to scrutiny</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">✅</div>
+        <div class="truth-stream-text">One tends to believe that which can be validated</div>
+      </div>
+    </div>
+    <div class="dual-badges" style="margin-top:14px;">
+      <div class="badge badge-pos-light">
+        <div class="badge-icon">+</div>
+        Where multiple tendencies converge, belief becomes a more reliable guide to choice
+      </div>
+      <div class="badge badge-neg-light">
+        <div class="badge-icon">−</div>
+        One tendency alone — especially feeling — can quietly mislead without the others
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:6">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">met honestly through</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 3b. KNOWING YOUR SELF -->
+  <div class="card card-truth" style="--i:6b">
+    <div class="card-eyebrow">The Inner Canvas</div>
+    <div class="card-title">Knowing Your Self</div>
+    <div class="card-body">
+      Alignment between a choice and your inner self is only possible if you know what your inner self actually is. Congruence is not a feeling — it is a reckoning. These are the six aspects of self that a truly aligned choice must account for.
+    </div>
+    <div class="truth-streams">
+      <div class="truth-stream">
+        <div class="truth-stream-icon">💧</div>
+        <div class="truth-stream-text">Needs — what you genuinely require to function and flourish</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🧭</div>
+        <div class="truth-stream-text">Beliefs — what you hold to be true about yourself and the world</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">⚖️</div>
+        <div class="truth-stream-text">Values — what matters most to you when it costs something</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🔥</div>
+        <div class="truth-stream-text">Interests — what genuinely draws and sustains your attention</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">🎯</div>
+        <div class="truth-stream-text">Intentions — what you are actually trying to bring about</div>
+      </div>
+      <div class="truth-stream">
+        <div class="truth-stream-icon">💪</div>
+        <div class="truth-stream-text">Strengths — what you are genuinely capable of at your best</div>
+      </div>
+    </div>
+    <div class="dual-badges" style="margin-top:14px;">
+      <div class="badge badge-pos-light">
+        <div class="badge-icon">+</div>
+        A choice that aligns with all six aspects carries the full weight of who you are
+      </div>
+      <div class="badge badge-neg-light">
+        <div class="badge-icon">−</div>
+        A choice made without self-knowledge is alignment by accident rather than by design
+      </div>
+    </div>
+    <div class="overlap-note" style="margin-top:14px;">
+      <strong style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:5px;">The Revelatory Nature of Choice</strong>
+      Choices reveal values before they are consciously named. How you actually spend your time and money is a more honest mirror of what you value than anything you would say if asked directly. Before you name your options, name what matters most to you in this decision — your guiding values. Not what should matter. What does.
+    </div>
+  </div>
+
+  <div class="connector" style="--i:6c">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">guides you onto the canvas of</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 4. CHOICE -->
+  <div class="card card-choice" style="--i:7">
+    <div class="card-eyebrow">C² — The Heart of It All</div>
+    <div class="card-title">Choice</div>
+    <div class="card-body">
+      You sense you could have gone another way. That road not taken is real — when you pick one path, you genuinely forfeit the other. There is no gold choice. There are only choices that align — or don't — with who you are and who you are becoming.
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-block-main">C³ = C : C → C</div>
+      <div class="formula-block-sub">Circumstance &nbsp;·&nbsp; Choice &nbsp;·&nbsp; Consequence</div>
+      <div class="formula-block-meaning">
+        When you understand your Circumstance and own your Choice,<br>
+        you are empowered — even when you cannot direct what follows.
+      </div>
+    </div>
+
+    <div class="dual-badges" style="margin-top:14px;">
+      <div class="badge badge-pos-dark">
+        <div class="badge-icon">+</div>
+        An aligned choice — true to your values — builds integrity over time
+      </div>
+      <div class="badge badge-neg-dark">
+        <div class="badge-icon">−</div>
+        A misaligned choice quietly erodes who you are becoming
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:8">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">inevitably produces</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 5. CONSEQUENCE -->
+  <div class="card card-consequences" style="--i:9">
+    <div class="card-eyebrow">C³ — The Inevitable Echo</div>
+    <div class="card-title">Consequence</div>
+    <div class="card-body">
+      Consequence is not something you direct. It is the inevitable product of choosing — it flows from your choice the way a ripple flows from a stone. You do not control where the water goes. What you can control is this: whether you accept it honestly, learn from it, and let it make you wiser.
+    </div>
+    <div class="consequence-note">
+      We are challenged not to direct consequences, but to accept them — and in that acceptance, find our greatest freedom.
+    </div>
+    <div class="dual-badges">
+      <div class="badge badge-pos-dark">
+        <div class="badge-icon">+</div>
+        Accepted consequences become the lessons that strengthen your next choice
+      </div>
+      <div class="badge badge-neg-dark">
+        <div class="badge-icon">−</div>
+        Denied consequences do not disappear — they compound and find you later
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:10">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">ripples back into</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 6. BIDIRECTIONAL FIELD -->
+  <div class="card card-ripple" style="--i:11">
+    <div class="card-eyebrow">The Ripple — The Living Loop</div>
+    <div class="card-title">Your Choices Become Others' Circumstances</div>
+    <div class="card-body">
+      No choice is ever truly private. Consequences flow back into the Field of Influence — and there they become new circumstances for other souls. The Field shaped your Circumstance. Your Choice produced a Consequence. That Consequence re-enters the Field. And the Field becomes someone else's Circumstance — the ground from which their next choice is made. The loop is living and continuous. You are constantly editing someone else's canvas whether you know it or not.
+    </div>
+    <div class="ripple-visual">
+      <div class="ripple-orb">
+        <div class="ripple-orb-inner">👥</div>
+        <div>Others' circumstances</div>
+      </div>
+      <div class="ripple-arrow">⟵</div>
+      <div class="ripple-center-orb">
+        <div class="ripple-center-orb-inner">🪨</div>
+        <div class="ripple-center-orb-label">Your Choice</div>
+      </div>
+      <div class="ripple-arrow">⟶</div>
+      <div class="ripple-orb">
+        <div class="ripple-orb-inner">🌱</div>
+        <div>The Field evolves</div>
+      </div>
+    </div>
+    <div class="dual-badges" style="margin-top:16px;">
+      <div class="badge badge-pos-light">
+        <div class="badge-icon">+</div>
+        Good choices expand the Field — opening doors for those around you that they may never have opened for themselves
+      </div>
+      <div class="badge badge-neg-light">
+        <div class="badge-icon">−</div>
+        Poor choices narrow others' canvas — often invisibly, often long after the original choice was made
+      </div>
+    </div>
+  </div>
+
+  <div class="connector" style="--i:12">
+    <div class="connector-stem"></div>
+    <div class="connector-badge">navigated alongside</div>
+    <div class="connector-stem-bottom"></div>
+  </div>
+
+  <!-- 7. WISE COUNSEL -->
+  <div class="card card-counsel" style="--i:13">
+    <div class="card-eyebrow">The Anchor — Not Optional</div>
+    <div class="card-title">Wise Counsel</div>
+    <div class="card-body">
+      In an absurd world, connection is not weakness — it is one of the wisest choices you can make. Your wise counsel aren't outside your field. They live within it. They expand your real array of options, help you read your circumstances more honestly, and shape better choices through the truth they're willing to tell you.
+      <br><br>
+      Choosing your people is one of the highest-order choices you will ever make. It is how you make meaning — and how you refuse to navigate the absurd alone.
+    </div>
+    <div class="dual-badges">
+      <div class="badge badge-pos-dark">
+        <div class="badge-icon">+</div>
+        Wise counsel illuminates blind spots before they become consequences
+      </div>
+      <div class="badge badge-neg-dark">
+        <div class="badge-icon">−</div>
+        Poor counsel — or none at all — leaves you choosing in the dark
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOULDERS WE STAND ON -->
+  <div class="shoulders-section">
+    <div class="shoulders-eyebrow">Shoulders We Stand On</div>
+    <div class="shoulders-sub">Seven thinkers whose ideas about choice inform this framework</div>
+    <div class="shoulders-grid">
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Jean-Paul Sartre</div>
+        <div class="shoulder-idea">Choice as Radical Freedom</div>
+        <div class="shoulder-quote">"Man is condemned to be free; because once thrown into the world, he is responsible for everything he does."</div>
+        <div class="shoulder-source">L'Existentialisme est un humanisme, 1946</div>
+        <div class="shoulder-link">C³ connection: The Field of Influence as thrownness. The Dawning of Agency as the recognition of radical freedom.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Albert Camus</div>
+        <div class="shoulder-idea">Choice as Revolt</div>
+        <div class="shoulder-quote">"It happens that the stage-sets collapse. Rising, tram, four hours in the office or factory, meal, tram, four hours of work, meal, sleep and Monday, Tuesday, Wednesday, Thursday, Friday and Saturday according to the same rhythm — this path is easily followed most of the time. But one day the ‘why’ arises and everything begins in that weariness tinged with amazement. ‘Begins’ — this is important."</div>
+        <div class="shoulder-source">The Myth of Sisyphus, p. 19, Penguin Modern Classics</div>
+        <div class="shoulder-quote" style="margin-top:10px;">"At any street corner the feeling of absurdity can strike any man in the face. As it is, in its distressing nudity, in its light without effulgence, it is elusive."</div>
+        <div class="shoulder-source">The Myth of Sisyphus, p. 17, Penguin Modern Classics</div>
+        <div class="shoulder-link">C³ connection: The first quote is the Dawning of Agency in Camus’s language — the moment the mechanical life cracks open and the ‘why’ arises. The second names the feeling that precedes it. Together they describe what the C³ framework was built to meet.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Abraham Maslow</div>
+        <div class="shoulder-idea">Choice as Growth</div>
+        <div class="shoulder-quote">"In each moment, we choose between safety and risk, between stepping forward into growth or back into security."</div>
+        <div class="shoulder-source">The Farther Reaches of Human Nature, Viking Press, 1971</div>
+        <div class="shoulder-quote" style="margin-top:10px;">"We have come to the point in biological history where we are now responsible for our own evolution… We have become self-evolvers. Evolution means selecting and therefore choosing and deciding, and this means valuing."</div>
+        <div class="shoulder-source">The Farther Reaches of Human Nature, Viking Press, 1971</div>
+        <div class="shoulder-link">C³ connection: The Fork. Every significant choice is a choice between who you are and who you are becoming. At the species level, Maslow names choice itself as the mechanism of human evolution — to choose is to value, and to value is to become.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">William James</div>
+        <div class="shoulder-idea">Choice as World-Making</div>
+        <div class="shoulder-quote">"My first act of free will shall be to believe in free will."</div>
+        <div class="shoulder-source">Diary entry, April 30, 1870. Quoted in Ralph Barton Perry, The Thought and Character of William James, vol. 1, p. 323</div>
+        <div class="shoulder-link">C³ connection: Pragmatic truth — truth found where feeling, utility, scrutiny, and convergence agree. We often must choose before all evidence is in.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Herbert Simon</div>
+        <div class="shoulder-idea">Choice as Bounded Rationality</div>
+        <div class="shoulder-quote">"At any moment there are a multitude of alternative (physically) possible actions, any one of which a given individual may undertake; by some process these numerous alternatives are narrowed down to that one which is in fact acted out."</div>
+        <div class="shoulder-source">Administrative Behavior, p. 3 (4th ed., Free Press, 1997; originally published 1947)</div>
+        <div class="shoulder-link">C³ connection: The Myth of the Golden Choice. We do not optimise — we choose the best available option given our circumstances, values, and limits.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Barry Schwartz</div>
+        <div class="shoulder-idea">Choice as Overload</div>
+        <div class="shoulder-quote">"We must decide, individually, when choice really matters and focus our energies there, even if it means letting many other opportunities pass us by. The choice of when to be a chooser may be the most important choice we have to make."</div>
+        <div class="shoulder-source">The Paradox of Choice: Why More Is Less, p. 104, HarperCollins, 2004</div>
+        <div class="shoulder-link">C³ connection: Why the framework limits options to three. More choices do not always produce more freedom — they often produce paralysis and regret.</div>
+      </div>
+
+      <div class="shoulder-card">
+        <div class="shoulder-name">Henry David Thoreau</div>
+        <div class="shoulder-idea">Choice as Deliberate Living</div>
+        <div class="shoulder-quote">"I went to the woods because I wished to live deliberately."</div>
+        <div class="shoulder-source">Walden, 1854</div>
+        <div class="shoulder-link">C³ connection: Integration and Coming Home. The goal is not perfect choices — it is a deliberately chosen life, lived with awareness of what each choice reveals.</div>
+      </div>
+
+    </div>
+    <div class="shoulders-signoff">
+      May the choices you make be the wisest ones possible in the moments you meet them.
+      <div class="shoulders-author">Steve, The Hopeful Humanist · The Choice Project · hopefulhumanistcafe.com</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
